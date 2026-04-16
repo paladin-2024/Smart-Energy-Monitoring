@@ -1,0 +1,42 @@
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Claude Code local session data — do not push to remote
+.claude/
+
+# Superpowers brainstorm sessions (local only)
+.superpowers/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.env
+venv/
+env/
+.pytest_cache/
+
+# AWS credentials — NEVER commit these
+*.pem
+*.key
+*.crt
+aws_credentials.json
+secrets.json
+
+# Arduino build artifacts
+*.hex
+*.elf
+*.bin
+build/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
