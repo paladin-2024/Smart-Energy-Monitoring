@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Energy Monitoring System</title>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    /* ── Reset & Base ───────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:        #0a0e1a;
+      --surface:   #111827;
+      --surface2:  #1a2235;
+      --border:    #1e2d45;
+      --accent:    #3b82f6;
+      --accent2:   #8b5cf6;
+      --accent3:   #10b981;
+      --accent4:   #f59e0b;
+      --danger:    #ef4444;
+      --text:      #e2e8f0;
+      --muted:     #64748b;
+      --white:     #ffffff;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ── Navigation ─────────────────────────────────────────── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(10,14,26,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; height: 56px;
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-weight: 700; font-size: 1rem; color: var(--accent);
+    }
+    .nav-links { display: flex; gap: 0.25rem; }
+    .nav-links a {
+      color: var(--muted); text-decoration: none; font-size: 0.85rem;
+      padding: 0.4rem 0.8rem; border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--text); background: var(--surface2); }
+
+    /* ── Slide Wrapper ──────────────────────────────────────── */
+    .slide {
+      min-height: 100vh;
+      padding: 80px 2rem 4rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* ── Slide Headers ──────────────────────────────────────── */
+    .slide-label {
+      font-size: 0.75rem; font-weight: 600; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--accent);
+      display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.75rem;
+    }
+    .slide-title {
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 800; line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+    .slide-subtitle {
+      font-size: 1.05rem; color: var(--muted); max-width: 640px;
+      margin-bottom: 2.5rem;
+    }
+    .gradient-text {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ── Grid Layouts ───────────────────────────────────────── */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; }
+    @media (max-width: 768px) {
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    }
+
+    /* ── Cards ──────────────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+    .card-accent { border-top: 3px solid var(--accent); }
+    .card-green  { border-top: 3px solid var(--accent3); }
+    .card-purple { border-top: 3px solid var(--accent2); }
+    .card-amber  { border-top: 3px solid var(--accent4); }
+    .card-red    { border-top: 3px solid var(--danger); }
+
+    .card h3 {
+      font-size: 0.9rem; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 0.5rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    .card .value {
+      font-size: 2rem; font-weight: 800; color: var(--white);
+    }
+    .card .desc { font-size: 0.82rem; color: var(--muted); margin-top: 0.25rem; }
+
+    /* ── Section dividers ───────────────────────────────────── */
+    .divider {
+      border: none; border-top: 1px solid var(--border);
+      margin: 3rem 0;
+    }
+
+    /* ── Hero (Slide 1) ─────────────────────────────────────── */
+    #slide-1 {
+      display: flex; flex-direction: column; justify-content: center;
+      min-height: 100vh; padding-top: 80px;
+    }
+    .hero-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 3rem; align-items: center;
+    }
+    @media (max-width: 900px) { .hero-grid { grid-template-columns: 1fr; } }
+
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.3);
+      color: var(--accent); border-radius: 999px;
+      padding: 0.3rem 0.9rem; font-size: 0.8rem; font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .hero-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.5rem; }
+    .tag {
+      padding: 0.3rem 0.75rem; border-radius: 6px; font-size: 0.78rem; font-weight: 600;
+      background: var(--surface2); border: 1px solid var(--border); color: var(--muted);
+    }
+    .tag-blue   { background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.25); color: var(--accent); }
+    .tag-green  { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.25); color: var(--accent3); }
+    .tag-purple { background: rgba(139,92,246,0.1); border-color: rgba(139,92,246,0.25); color: var(--accent2); }
+    .tag-amber  { background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.25); color: var(--accent4); }
+
+    .hero-img-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;
+    }
+    .hero-img-grid .img-wrap {
+      border-radius: 10px; overflow: hidden;
+      border: 1px solid var(--border);
+      aspect-ratio: 4/3;
+      background: var(--surface2);
+    }
+    .hero-img-grid .img-wrap img {
+      width: 100%; height: 100%; object-fit: cover;
+      display: block;
+    }
+    .hero-img-grid .img-wrap.tall {
+      grid-row: span 2; aspect-ratio: auto;
+    }
+
+    /* ── Part cards ─────────────────────────────────────────── */
+    .part-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.75rem;
+      position: relative; overflow: hidden;
+    }
+    .part-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    }
+    .part-card.part-a::before { background: var(--accent); }
+    .part-card.part-b::before { background: var(--accent3); }
+    .part-card.part-c::before { background: var(--accent2); }
+
+    .part-number {
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; margin-bottom: 0.4rem;
+    }
+    .part-a .part-number { color: var(--accent); }
+    .part-b .part-number { color: var(--accent3); }
+    .part-c .part-number { color: var(--accent2); }
+
+    .part-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.75rem; }
+    .part-card ul { list-style: none; display: flex; flex-direction: column; gap: 0.4rem; }
+    .part-card ul li {
+      font-size: 0.85rem; color: var(--muted);
+      display: flex; align-items: flex-start; gap: 0.5rem;
+    }
+    .part-card ul li::before { content: '→'; color: var(--accent); flex-shrink: 0; }
+    .part-a ul li::before { color: var(--accent); }
+    .part-b ul li::before { color: var(--accent3); }
+    .part-c ul li::before { color: var(--accent2); }
+
+    .marks-badge {
+      position: absolute; top: 1.25rem; right: 1.25rem;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 0.25rem 0.6rem;
+      font-size: 0.75rem; font-weight: 700; color: var(--muted);
+    }
+
+    /* ── Component grid ─────────────────────────────────────── */
+    .component-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .component-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--accent);
+    }
+    .component-img {
+      width: 100%; aspect-ratio: 1;
+      object-fit: cover; display: block;
+      background: var(--surface2);
+    }
+    .component-info { padding: 0.75rem 1rem; }
+    .component-info h4 { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.2rem; }
+    .component-info p  { font-size: 0.75rem; color: var(--muted); }
+
+    /* ── Architecture diagram ───────────────────────────────── */
+    .arch-flow {
+      display: flex; align-items: stretch;
+      gap: 0; overflow-x: auto;
+      padding: 2rem 0;
+    }
+    .arch-node {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem 1rem;
+      min-width: 130px;
+      text-align: center;
+      flex-shrink: 0;
+      display: flex; flex-direction: column; align-items: center; gap: 0.6rem;
+    }
+    .arch-node .node-icon {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .arch-node .node-label { font-size: 0.78rem; font-weight: 700; }
+    .arch-node .node-sub   { font-size: 0.68rem; color: var(--muted); }
+    .arch-node img.logo {
+      width: 40px; height: 40px; object-fit: contain;
+      border-radius: 8px;
+    }
+    .arch-arrow {
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 0.3rem;
+      flex-shrink: 0; padding: 0 0.5rem; min-width: 72px;
+    }
+    .arch-arrow .arrow-line {
+      width: 100%; height: 2px;
+      background: linear-gradient(90deg, var(--border), var(--accent), var(--border));
+      position: relative;
+    }
+    .arch-arrow .arrow-label {
+      font-size: 0.62rem; color: var(--muted); text-align: center; white-space: nowrap;
+    }
+
+    /* ── SVG Charts ─────────────────────────────────────────── */
+    .chart-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+    .chart-title {
+      font-size: 0.85rem; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.08em;
+      margin-bottom: 1rem;
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    svg text { font-family: 'Inter', system-ui, sans-serif; }
+
+    /* animated power line */
+    @keyframes draw-line {
+      from { stroke-dashoffset: 600; }
+      to   { stroke-dashoffset: 0; }
+    }
+    .animated-path {
+      stroke-dasharray: 600;
+      stroke-dashoffset: 600;
+      animation: draw-line 2s ease-out forwards;
+    }
+    .animated-path-delay {
+      stroke-dasharray: 600;
+      stroke-dashoffset: 600;
+      animation: draw-line 2s ease-out 0.4s forwards;
+    }
+
+    /* gauge animation */
+    @keyframes gauge-fill {
+      from { stroke-dashoffset: 226; }
+      to   { stroke-dashoffset: var(--gauge-end); }
+    }
+    .gauge-arc {
+      stroke-dasharray: 226;
+      stroke-dashoffset: 226;
+      animation: gauge-fill 1.8s ease-out 0.3s forwards;
+    }
+
+    /* bar animation */
+    @keyframes bar-grow {
+      from { transform: scaleY(0); }
+      to   { transform: scaleY(1); }
+    }
+    .bar-animated {
+      transform-origin: bottom;
+      transform: scaleY(0);
+      animation: bar-grow 0.7s ease-out forwards;
+    }
+
+    /* ── Pipeline ───────────────────────────────────────────── */
+    .pipeline {
+      display: flex; flex-direction: column; gap: 0;
+    }
+    .pipeline-step {
+      display: flex; gap: 1rem; align-items: flex-start;
+      padding: 1.25rem 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 0.5rem;
+      position: relative;
+    }
+    .step-num {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.3);
+      color: var(--accent); font-weight: 800; font-size: 0.85rem;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .step-content h4 { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.2rem; }
+    .step-content p  { font-size: 0.8rem; color: var(--muted); }
+
+    /* ── Code block ─────────────────────────────────────────── */
+    .code-block {
+      background: #0d1117;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 0.82rem;
+      line-height: 1.7;
+      overflow-x: auto;
+    }
+    .code-kw  { color: #ff7b72; }
+    .code-fn  { color: #d2a8ff; }
+    .code-str { color: #a5d6ff; }
+    .code-num { color: #79c0ff; }
+    .code-cm  { color: #8b949e; }
+    .code-var { color: #ffa657; }
+
+    /* ── Metric strip ───────────────────────────────────────── */
+    .metric-strip {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    @media (max-width: 768px) { .metric-strip { grid-template-columns: 1fr 1fr; } }
+
+    .metric {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.1rem 1.25rem;
+    }
+    .metric .m-label {
+      font-size: 0.72rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--muted); margin-bottom: 0.3rem;
+      display: flex; align-items: center; gap: 0.35rem;
+    }
+    .metric .m-value { font-size: 1.6rem; font-weight: 800; color: var(--white); }
+    .metric .m-unit  { font-size: 0.75rem; color: var(--muted); }
+
+    /* ── Table ──────────────────────────────────────────────── */
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th {
+      text-align: left; font-size: 0.72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.08em;
+      color: var(--muted); padding: 0.6rem 0.8rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .data-table td {
+      padding: 0.65rem 0.8rem; font-size: 0.85rem;
+      border-bottom: 1px solid rgba(30,45,69,0.5);
+    }
+    .data-table tr:last-child td { border-bottom: none; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      padding: 0.2rem 0.55rem; border-radius: 5px;
+      font-size: 0.72rem; font-weight: 600;
+    }
+    .badge-safe    { background: rgba(16,185,129,0.12); color: var(--accent3); }
+    .badge-alert   { background: rgba(239,68,68,0.12);  color: var(--danger);  }
+    .badge-predict { background: rgba(139,92,246,0.12); color: var(--accent2); }
+
+    /* ── Logo row ───────────────────────────────────────────── */
+    .logo-row {
+      display: flex; align-items: center; flex-wrap: wrap; gap: 2rem;
+      padding: 2rem; background: var(--surface);
+      border: 1px solid var(--border); border-radius: 12px;
+    }
+    .logo-item {
+      display: flex; align-items: center; gap: 0.75rem;
+      flex-direction: column; text-align: center;
+    }
+    .logo-item img {
+      width: 60px; height: 60px; object-fit: contain;
+      filter: brightness(0.9) contrast(1.1);
+    }
+    .logo-item span { font-size: 0.72rem; color: var(--muted); font-weight: 600; }
+
+    /* ── Footer ─────────────────────────────────────────────── */
+    footer {
+      text-align: center; padding: 3rem 2rem;
+      color: var(--muted); font-size: 0.82rem;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── Scroll indicator ───────────────────────────────────── */
+    .scroll-hint {
+      display: flex; align-items: center; gap: 0.4rem;
+      color: var(--muted); font-size: 0.8rem; margin-top: 2rem;
+      animation: bounce 2s infinite;
+    }
+    @keyframes bounce {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(4px); }
+    }
+
+    /* ── Responsive tweaks ──────────────────────────────────── */
+    @media (max-width: 768px) {
+      .arch-flow { flex-direction: column; align-items: stretch; }
+      .arch-arrow { transform: rotate(90deg); width: 60px; margin: 0 auto; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Navigation ──────────────────────────────────────────── -->
+<nav>
+  <div class="nav-brand">
+    <i data-lucide="zap" style="width:18px;height:18px;"></i>
+    SmartEnergy
+  </div>
+  <div class="nav-links">
+    <a href="#slide-1" class="active">Overview</a>
+    <a href="#slide-2">Hardware</a>
+    <a href="#slide-3">Cloud</a>
+    <a href="#slide-4">AI</a>
+    <a href="#slide-5">Results</a>
+  </div>
+</nav>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     SLIDE 1 — Hero / Overview
+═════════════════════════════════════════════════════════════ -->
+<section id="slide-1">
+  <div class="slide">
+    <div class="hero-grid">
+
+      <!-- Left: Text -->
+      <div>
+        <div class="hero-badge">
+          <i data-lucide="graduation-cap" style="width:14px;height:14px;"></i>
+          Course Assignment — 100 Marks
+        </div>
+        <h1 class="slide-title">
+          Smart Energy<br>
+          <span class="gradient-text">Monitoring System</span>
+        </h1>
+        <p class="slide-subtitle">
+          A three-part IoT pipeline: ESP32 sensor simulation, multi-cloud
+          dashboards, and AWS-hosted AI power prediction with real-time alerts.
+        </p>
+
+        <div class="hero-tags">
+          <span class="tag tag-blue">ESP32</span>
+          <span class="tag tag-blue">Arduino C++</span>
+          <span class="tag tag-green">ThingSpeak</span>
+          <span class="tag tag-green">MATLAB</span>
+          <span class="tag tag-purple">AWS IoT Core</span>
+          <span class="tag tag-purple">Lambda</span>
+          <span class="tag tag-purple">DynamoDB</span>
+          <span class="tag tag-amber">Grafana</span>
+          <span class="tag tag-amber">NumPy AI</span>
+        </div>
+
+        <div class="scroll-hint" style="margin-top:2rem;">
+          <i data-lucide="chevrons-down" style="width:16px;height:16px;"></i>
+          Scroll to explore
+        </div>
+      </div>
+
+      <!-- Right: Photo grid -->
+      <div class="hero-img-grid">
+        <div class="img-wrap tall">
+          <img src="assets/esp32.jpg" alt="ESP32 microcontroller" />
+        </div>
+        <div class="img-wrap">
+          <img src="assets/oled.jpg" alt="OLED display" />
+        </div>
+        <div class="img-wrap">
+          <img src="assets/ACS712.jpg" alt="ACS712 current sensor" />
+        </div>
+      </div>
+
+    </div>
+
+    <hr class="divider" />
+
+    <!-- Part overview cards -->
+    <div class="grid-3">
+
+      <div class="part-card part-a">
+        <div class="marks-badge">40 marks</div>
+        <div class="part-number">Part A</div>
+        <h3>Hardware Simulation</h3>
+        <ul>
+          <li>ESP32 WROOM-32 on Wokwi</li>
+          <li>GPIO34/35 ADC voltage &amp; current</li>
+          <li>SSD1306 OLED live display</li>
+          <li>150W overload alert + buzzer</li>
+          <li>Green/Red LED status indicators</li>
+        </ul>
+      </div>
+
+      <div class="part-card part-b">
+        <div class="marks-badge">30 marks</div>
+        <div class="part-number">Part B</div>
+        <h3>ThingSpeak Cloud</h3>
+        <ul>
+          <li>WiFi HTTP POST every 15 s</li>
+          <li>4 channels: V, I, P, alert</li>
+          <li>MATLAB moving average (window=10)</li>
+          <li>ThingSpeak React email alerts</li>
+          <li>Public Grafana-style charts</li>
+        </ul>
+      </div>
+
+      <div class="part-card part-c">
+        <div class="marks-badge">30 marks</div>
+        <div class="part-number">Part C</div>
+        <h3>AWS IoT + AI</h3>
+        <ul>
+          <li>MQTT/TLS to AWS IoT Core</li>
+          <li>Lambda: NumPy linear regression</li>
+          <li>Open-Meteo temperature correction</li>
+          <li>DynamoDB time-series storage</li>
+          <li>Grafana Infinity live dashboard</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <hr class="divider" />
+
+    <!-- Tech logos -->
+    <p class="slide-label"><i data-lucide="layers" style="width:14px;height:14px;"></i> Technology Stack</p>
+    <div class="logo-row">
+      <div class="logo-item">
+        <img src="assets/espressif_logo.jpg" alt="Espressif" />
+        <span>Espressif / ESP32</span>
+      </div>
+      <div class="logo-item">
+        <img src="assets/wokwi_logo.png" alt="Wokwi" />
+        <span>Wokwi Simulator</span>
+      </div>
+      <div class="logo-item">
+        <img src="assets/thingspeak_logo.jpg" alt="ThingSpeak" />
+        <span>ThingSpeak</span>
+      </div>
+      <div class="logo-item">
+        <img src="assets/aws_logo.jpg" alt="AWS" />
+        <span>AWS IoT + Lambda</span>
+      </div>
+      <div class="logo-item">
+        <img src="assets/grafana_logo.jpg" alt="Grafana" />
+        <span>Grafana Cloud</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     SLIDE 2 — Hardware & Circuit (Part A)
+═════════════════════════════════════════════════════════════ -->
+<section id="slide-2" style="background: linear-gradient(180deg, var(--bg) 0%, var(--surface) 100%);">
+  <div class="slide">
+
+    <div class="slide-label">
+      <i data-lucide="cpu" style="width:14px;height:14px;"></i>
+      Part A — 40 Marks
+    </div>
+    <h2 class="slide-title">Hardware &amp; <span class="gradient-text">Circuit Design</span></h2>
+    <p class="slide-subtitle">
+      ESP32 WROOM-32 simulation on Wokwi with real-time sensor reading, OLED display, and overload protection.
+    </p>
+
+    <!-- Component grid -->
+    <p class="slide-label" style="margin-bottom:1rem;"><i data-lucide="package" style="width:14px;height:14px;"></i> Components</p>
+    <div class="grid-4" style="margin-bottom:2.5rem;">
+      <div class="component-card">
+        <img class="component-img" src="assets/esp32.jpg" alt="ESP32" />
+        <div class="component-info">
+          <h4>ESP32 WROOM-32</h4>
+          <p>Main MCU — dual-core, WiFi/BT, 34 GPIO</p>
+        </div>
+      </div>
+      <div class="component-card">
+        <img class="component-img" src="assets/oled.jpg" alt="OLED" />
+        <div class="component-info">
+          <h4>SSD1306 OLED</h4>
+          <p>128×64 monochrome I2C display (0x3C)</p>
+        </div>
+      </div>
+      <div class="component-card">
+        <img class="component-img" src="assets/ACS712.jpg" alt="ACS712" />
+        <div class="component-info">
+          <h4>ACS712 Sensor</h4>
+          <p>Hall-effect current sensor (simulated via ADC)</p>
+        </div>
+      </div>
+      <div class="component-card">
+        <img class="component-img" src="assets/potentiometer.jpg" alt="Potentiometer" />
+        <div class="component-info">
+          <h4>Potentiometers ×2</h4>
+          <p>Simulate voltage &amp; current on GPIO34/35</p>
+        </div>
+      </div>
+      <div class="component-card">
+        <img class="component-img" src="assets/led_green.jpg" alt="Green LED" />
+        <div class="component-info">
+          <h4>Green LED</h4>
+          <p>SAFE status indicator (GPIO25)</p>
+        </div>
+      </div>
+      <div class="component-card">
+        <img class="component-img" src="assets/led_red.jpg" alt="Red LED" />
+        <div class="component-info">
+          <h4>Red LED</h4>
+          <p>OVERLOAD alert indicator (GPIO26)</p>
+        </div>
+      </div>
+      <div class="component-card">
+        <img class="component-img" src="assets/buzzer.jpg" alt="Buzzer" />
+        <div class="component-info">
+          <h4>Buzzer</h4>
+          <p>Audible overload alarm (GPIO27)</p>
+        </div>
+      </div>
+      <div class="component-card">
+        <img class="component-img" src="assets/breadboard.jpg" alt="Breadboard" />
+        <div class="component-info">
+          <h4>Breadboard</h4>
+          <p>Prototyping platform for all connections</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pin table + Power math side by side -->
+    <div class="grid-2">
+      <div class="card">
+        <h3><i data-lucide="git-branch" style="width:14px;height:14px;"></i> GPIO Pin Assignments</h3>
+        <table class="data-table" style="margin-top:0.75rem;">
+          <thead>
+            <tr>
+              <th>Pin</th>
+              <th>Function</th>
+              <th>Why</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><code>GPIO34</code></td><td>Voltage ADC</td><td>ADC1 — works with WiFi</td></tr>
+            <tr><td><code>GPIO35</code></td><td>Current ADC</td><td>ADC1 — input-only</td></tr>
+            <tr><td><code>GPIO21</code></td><td>OLED SDA</td><td>Hardware I2C bus</td></tr>
+            <tr><td><code>GPIO22</code></td><td>OLED SCL</td><td>Hardware I2C bus</td></tr>
+            <tr><td><code>GPIO25</code></td><td>Green LED</td><td>DAC-capable GPIO</td></tr>
+            <tr><td><code>GPIO26</code></td><td>Red LED</td><td>DAC-capable GPIO</td></tr>
+            <tr><td><code>GPIO27</code></td><td>Buzzer</td><td>PWM-capable GPIO</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div>
+        <div class="card card-accent" style="margin-bottom:1rem;">
+          <h3><i data-lucide="calculator" style="width:14px;height:14px;"></i> Power Calculation</h3>
+          <div class="code-block" style="margin-top:0.75rem;">
+<span class="code-cm">// ADC: 0–4095 → scaled to physical units</span>
+<span class="code-var">voltage</span> = (raw / <span class="code-num">4095.0</span>) × <span class="code-num">240</span>  <span class="code-cm">// 0–240 V</span>
+<span class="code-var">current</span> = (raw / <span class="code-num">4095.0</span>) × <span class="code-num">10</span>   <span class="code-cm">// 0–10 A</span>
+<span class="code-var">power</span>   = voltage × current        <span class="code-cm">// Watts</span>
+<span class="code-var">alert</span>   = power > <span class="code-num">150.0</span> ? <span class="code-num">1</span> : <span class="code-num">0</span>   <span class="code-cm">// Threshold</span>
+          </div>
+        </div>
+
+        <div class="card card-green">
+          <h3><i data-lucide="monitor" style="width:14px;height:14px;"></i> OLED Layout</h3>
+          <div style="background:#000;border:1px solid #333;border-radius:6px;padding:1rem;font-family:monospace;font-size:0.78rem;line-height:1.6;margin-top:0.75rem;">
+            <div style="color:#fff;border-bottom:1px solid #333;padding-bottom:0.3rem;margin-bottom:0.3rem;font-weight:bold;text-align:center;">SMART ENERGY MON.</div>
+            <div style="color:#aaa;">V: <span style="color:#fff;">220.50 V</span></div>
+            <div style="color:#aaa;">I: <span style="color:#fff;"> 0.68 A</span></div>
+            <div style="color:#aaa;">P: <span style="color:#fff;">149.94 W</span></div>
+            <div style="color:#0f0;">Status: SAFE</div>
+            <div style="color:#aaa;font-size:0.68rem;">2026-04-17 14:32:00</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- Live power chart -->
+    <div class="chart-wrap">
+      <div class="chart-title">
+        <i data-lucide="activity" style="width:14px;height:14px;"></i>
+        Simulated Power Readings — Part A Output
+      </div>
+      <svg viewBox="0 0 800 220" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+        <!-- Grid lines -->
+        <line x1="60" y1="20"  x2="780" y2="20"  stroke="#1e2d45" stroke-width="1"/>
+        <line x1="60" y1="65"  x2="780" y2="65"  stroke="#1e2d45" stroke-width="1"/>
+        <line x1="60" y1="110" x2="780" y2="110" stroke="#1e2d45" stroke-width="1"/>
+        <line x1="60" y1="155" x2="780" y2="155" stroke="#1e2d45" stroke-width="1"/>
+        <line x1="60" y1="200" x2="780" y2="200" stroke="#1e2d45" stroke-width="1"/>
+        <!-- Y axis labels -->
+        <text x="55" y="24"  text-anchor="end" font-size="10" fill="#64748b">200W</text>
+        <text x="55" y="69"  text-anchor="end" font-size="10" fill="#64748b">150W</text>
+        <text x="55" y="114" text-anchor="end" font-size="10" fill="#64748b">100W</text>
+        <text x="55" y="159" text-anchor="end" font-size="10" fill="#64748b">50W</text>
+        <text x="55" y="204" text-anchor="end" font-size="10" fill="#64748b">0W</text>
+        <!-- Overload threshold line -->
+        <line x1="60" y1="65" x2="780" y2="65" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.6"/>
+        <text x="785" y="69" font-size="9" fill="#ef4444">150W</text>
+        <!-- Power area fill -->
+        <defs>
+          <linearGradient id="powerGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stop-color="#3b82f6" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.02"/>
+          </linearGradient>
+          <clipPath id="chartClip">
+            <rect x="60" y="15" width="720" height="190"/>
+          </clipPath>
+        </defs>
+        <path
+          d="M60,180 L117,162 L174,140 L231,118 L288,95 L345,72 L402,58 L459,42 L516,60 L573,80 L630,100 L687,118 L744,130 L780,140 L780,200 L60,200 Z"
+          fill="url(#powerGrad)" clip-path="url(#chartClip)"/>
+        <!-- Power line -->
+        <path class="animated-path"
+          d="M60,180 L117,162 L174,140 L231,118 L288,95 L345,72 L402,58 L459,42 L516,60 L573,80 L630,100 L687,118 L744,130 L780,140"
+          fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" clip-path="url(#chartClip)"/>
+        <!-- Overload dot -->
+        <circle cx="459" cy="42" r="5" fill="#ef4444" opacity="0.9"/>
+        <text x="465" y="38" font-size="9" fill="#ef4444">OVERLOAD</text>
+        <!-- X labels -->
+        <text x="60"  y="215" text-anchor="middle" font-size="9" fill="#64748b">0s</text>
+        <text x="231" y="215" text-anchor="middle" font-size="9" fill="#64748b">45s</text>
+        <text x="402" y="215" text-anchor="middle" font-size="9" fill="#64748b">90s</text>
+        <text x="573" y="215" text-anchor="middle" font-size="9" fill="#64748b">135s</text>
+        <text x="744" y="215" text-anchor="middle" font-size="9" fill="#64748b">180s</text>
+        <!-- Legend -->
+        <rect x="620" y="22" width="10" height="3" rx="1" fill="#3b82f6"/>
+        <text x="634" y="27" font-size="10" fill="#94a3b8">Power (W)</text>
+        <line x1="620" y1="38" x2="630" y2="38" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <text x="634" y="42" font-size="10" fill="#94a3b8">Threshold</text>
+      </svg>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     SLIDE 3 — ThingSpeak Cloud (Part B)
+═════════════════════════════════════════════════════════════ -->
+<section id="slide-3">
+  <div class="slide">
+
+    <div class="slide-label">
+      <i data-lucide="cloud" style="width:14px;height:14px;"></i>
+      Part B — 30 Marks
+    </div>
+    <h2 class="slide-title">ThingSpeak <span class="gradient-text">Cloud Dashboard</span></h2>
+    <p class="slide-subtitle">
+      WiFi-enabled ESP32 posts sensor readings every 15 seconds to ThingSpeak. MATLAB moving average smooths noisy data.
+    </p>
+
+    <!-- Metrics -->
+    <div class="metric-strip">
+      <div class="metric">
+        <div class="m-label"><i data-lucide="timer" style="width:12px;height:12px;"></i> Upload Interval</div>
+        <div class="m-value">15<span class="m-unit">s</span></div>
+      </div>
+      <div class="metric">
+        <div class="m-label"><i data-lucide="database" style="width:12px;height:12px;"></i> Channels</div>
+        <div class="m-value">4</div>
+      </div>
+      <div class="metric">
+        <div class="m-label"><i data-lucide="trending-up" style="width:12px;height:12px;"></i> MA Window</div>
+        <div class="m-value">10<span class="m-unit"> pts</span></div>
+      </div>
+      <div class="metric">
+        <div class="m-label"><i data-lucide="bell" style="width:12px;height:12px;"></i> Alert Method</div>
+        <div class="m-value" style="font-size:1.1rem;">Email</div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- ThingSpeak channel table -->
+      <div class="chart-wrap">
+        <div class="chart-title">
+          <i data-lucide="table" style="width:14px;height:14px;"></i>
+          ThingSpeak Channel Fields
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr><th>Field</th><th>Variable</th><th>Unit</th><th>Range</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>field1</td><td>Voltage</td><td>V</td><td>0 – 240</td></tr>
+            <tr><td>field2</td><td>Current</td><td>A</td><td>0 – 10</td></tr>
+            <tr><td>field3</td><td>Power</td><td>W</td><td>0 – 2400</td></tr>
+            <tr><td>field4</td><td>Alert</td><td>—</td><td>0 or 1</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Moving average chart -->
+      <div class="chart-wrap">
+        <div class="chart-title">
+          <i data-lucide="trending-up" style="width:14px;height:14px;"></i>
+          MATLAB Moving Average — Power Smoothing
+        </div>
+        <svg viewBox="0 0 400 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+          <defs>
+            <linearGradient id="rawGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   stop-color="#3b82f6" stop-opacity="0.15"/>
+              <stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <!-- Grid -->
+          <line x1="30" y1="15"  x2="390" y2="15"  stroke="#1e2d45" stroke-width="1"/>
+          <line x1="30" y1="55"  x2="390" y2="55"  stroke="#1e2d45" stroke-width="1"/>
+          <line x1="30" y1="95"  x2="390" y2="95"  stroke="#1e2d45" stroke-width="1"/>
+          <line x1="30" y1="135" x2="390" y2="135" stroke="#1e2d45" stroke-width="1"/>
+          <!-- Raw (noisy) -->
+          <path class="animated-path"
+            d="M30,110 L60,85 L90,120 L120,70 L150,100 L180,55 L210,80 L240,40 L270,70 L300,95 L330,60 L360,85 L390,70"
+            fill="none" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+          <!-- Smoothed MA -->
+          <path class="animated-path-delay"
+            d="M30,110 L60,97 L90,98 L120,91 L150,86 L180,80 L210,76 L240,69 L270,67 L300,72 L330,72 L360,75 L390,72"
+            fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Legend -->
+          <line x1="250" y1="15" x2="270" y2="15" stroke="#3b82f6" stroke-width="1.5" opacity="0.4"/>
+          <text x="275" y="19" font-size="9" fill="#94a3b8">Raw</text>
+          <line x1="250" y1="28" x2="270" y2="28" stroke="#10b981" stroke-width="2.5"/>
+          <text x="275" y="32" font-size="9" fill="#94a3b8">movmean(10)</text>
+        </svg>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- Data flow code -->
+    <div class="grid-2">
+      <div>
+        <p class="slide-label" style="margin-bottom:1rem;"><i data-lucide="code-2" style="width:14px;height:14px;"></i> HTTP POST (Arduino)</p>
+        <div class="code-block">
+<span class="code-kw">String</span> url = THINGSPEAK_URL
+  + <span class="code-str">"?api_key="</span> + API_KEY
+  + <span class="code-str">"&field1="</span> + <span class="code-fn">String</span>(voltage, <span class="code-num">2</span>)
+  + <span class="code-str">"&field2="</span> + <span class="code-fn">String</span>(current, <span class="code-num">2</span>)
+  + <span class="code-str">"&field3="</span> + <span class="code-fn">String</span>(power, <span class="code-num">2</span>)
+  + <span class="code-str">"&field4="</span> + <span class="code-fn">String</span>(alert);
+
+http.<span class="code-fn">begin</span>(url);
+<span class="code-kw">int</span> code = http.<span class="code-fn">GET</span>();   <span class="code-cm">// 200 = OK</span>
+http.<span class="code-fn">end</span>();
+        </div>
+      </div>
+
+      <div>
+        <p class="slide-label" style="margin-bottom:1rem;"><i data-lucide="code-2" style="width:14px;height:14px;"></i> MATLAB Analysis</p>
+        <div class="code-block">
+<span class="code-cm">% Fetch from ThingSpeak</span>
+data = <span class="code-fn">thingSpeakRead</span>(channelID, <span class="code-str">'Fields'</span>, <span class="code-num">3</span>, ...
+       <span class="code-str">'NumPoints'</span>, <span class="code-num">200</span>);
+
+<span class="code-cm">% Moving average smoothing</span>
+smoothed = <span class="code-fn">movmean</span>(data, <span class="code-num">10</span>, <span class="code-str">'Endpoints'</span>, <span class="code-str">'shrink'</span>);
+
+<span class="code-cm">% Overload events</span>
+overload_idx = <span class="code-fn">find</span>(data > <span class="code-num">150</span>);
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     SLIDE 4 — AWS IoT + AI (Part C)
+═════════════════════════════════════════════════════════════ -->
+<section id="slide-4" style="background: linear-gradient(180deg, var(--bg) 0%, var(--surface) 100%);">
+  <div class="slide">
+
+    <div class="slide-label">
+      <i data-lucide="brain" style="width:14px;height:14px;"></i>
+      Part C — 30 Marks
+    </div>
+    <h2 class="slide-title">AWS IoT &amp; <span class="gradient-text">AI Prediction</span></h2>
+    <p class="slide-subtitle">
+      MQTT over TLS feeds a Lambda function that runs NumPy linear regression, fetches real-time weather, and publishes predictions back to the device.
+    </p>
+
+    <!-- Architecture flow -->
+    <div class="chart-wrap" style="margin-bottom:2rem;overflow-x:auto;">
+      <div class="chart-title">
+        <i data-lucide="workflow" style="width:14px;height:14px;"></i>
+        End-to-End Data Pipeline
+      </div>
+      <div class="arch-flow">
+        <div class="arch-node" style="border-color:rgba(59,130,246,0.4);">
+          <img class="logo" src="assets/esp32.jpg" alt="ESP32" />
+          <div class="node-label">ESP32</div>
+          <div class="node-sub">sketch_aws.ino</div>
+        </div>
+        <div class="arch-arrow">
+          <div class="arrow-line"></div>
+          <div class="arrow-label">MQTT/TLS<br>port 8883</div>
+        </div>
+        <div class="arch-node" style="border-color:rgba(245,158,11,0.4);">
+          <img class="logo" src="assets/aws_logo.jpg" alt="AWS" />
+          <div class="node-label">IoT Core</div>
+          <div class="node-sub">energy/monitor</div>
+        </div>
+        <div class="arch-arrow">
+          <div class="arrow-line"></div>
+          <div class="arrow-label">IoT Rule<br>trigger</div>
+        </div>
+        <div class="arch-node" style="border-color:rgba(139,92,246,0.4);">
+          <img class="logo" src="assets/aws_logo.jpg" alt="Lambda" />
+          <div class="node-label">Lambda</div>
+          <div class="node-sub">AI + Storage</div>
+        </div>
+        <div class="arch-arrow">
+          <div class="arrow-line"></div>
+          <div class="arrow-label">PutItem<br>JSON</div>
+        </div>
+        <div class="arch-node" style="border-color:rgba(16,185,129,0.4);">
+          <img class="logo" src="assets/aws_logo.jpg" alt="DynamoDB" />
+          <div class="node-label">DynamoDB</div>
+          <div class="node-sub">EnergyReadings</div>
+        </div>
+        <div class="arch-arrow">
+          <div class="arrow-line"></div>
+          <div class="arrow-label">HTTP GET<br>JSON</div>
+        </div>
+        <div class="arch-node" style="border-color:rgba(245,158,11,0.4);">
+          <img class="logo" src="assets/grafana_logo.jpg" alt="Grafana" />
+          <div class="node-label">Grafana</div>
+          <div class="node-sub">Infinity plugin</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- AI Pipeline steps -->
+      <div>
+        <p class="slide-label" style="margin-bottom:1rem;"><i data-lucide="cpu" style="width:14px;height:14px;"></i> Lambda AI Pipeline</p>
+        <div class="pipeline">
+          <div class="pipeline-step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+              <h4>Receive MQTT Event</h4>
+              <p>Lambda triggered by IoT Rule with JSON payload from ESP32</p>
+            </div>
+          </div>
+          <div class="pipeline-step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+              <h4>Write to DynamoDB</h4>
+              <p>PutItem with deviceId + ISO 8601 timestamp composite key</p>
+            </div>
+          </div>
+          <div class="pipeline-step">
+            <div class="step-num">3</div>
+            <div class="step-content">
+              <h4>Fetch Weather</h4>
+              <p>Open-Meteo API → ambient temperature (Kampala, Uganda)</p>
+            </div>
+          </div>
+          <div class="pipeline-step">
+            <div class="step-num">4</div>
+            <div class="step-content">
+              <h4>NumPy Regression</h4>
+              <p>np.polyfit on last 10 readings → predict next value</p>
+            </div>
+          </div>
+          <div class="pipeline-step">
+            <div class="step-num">5</div>
+            <div class="step-content">
+              <h4>Apply Corrections</h4>
+              <p>Temperature +0.5%/°C above 25°C, peak-hour threshold × 0.85</p>
+            </div>
+          </div>
+          <div class="pipeline-step">
+            <div class="step-num">6</div>
+            <div class="step-content">
+              <h4>Publish Prediction</h4>
+              <p>IoT Core → energy/predictions → ESP32 OLED "AI: xxx.xW"</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Regression + gauge -->
+      <div style="display:flex;flex-direction:column;gap:1.25rem;">
+        <div class="chart-wrap">
+          <div class="chart-title">
+            <i data-lucide="trending-up" style="width:14px;height:14px;"></i>
+            Linear Regression Prediction
+          </div>
+          <svg viewBox="0 0 380 180" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+            <defs>
+              <linearGradient id="regGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stop-color="#8b5cf6" stop-opacity="0.25"/>
+                <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <!-- Grid -->
+            <line x1="40" y1="20"  x2="370" y2="20"  stroke="#1e2d45" stroke-width="1"/>
+            <line x1="40" y1="60"  x2="370" y2="60"  stroke="#1e2d45" stroke-width="1"/>
+            <line x1="40" y1="100" x2="370" y2="100" stroke="#1e2d45" stroke-width="1"/>
+            <line x1="40" y1="140" x2="370" y2="140" stroke="#1e2d45" stroke-width="1"/>
+            <!-- Historical dots -->
+            <circle cx="60"  cy="130" r="3.5" fill="#3b82f6"/>
+            <circle cx="95"  cy="120" r="3.5" fill="#3b82f6"/>
+            <circle cx="130" cy="108" r="3.5" fill="#3b82f6"/>
+            <circle cx="165" cy="95"  r="3.5" fill="#3b82f6"/>
+            <circle cx="200" cy="88"  r="3.5" fill="#3b82f6"/>
+            <circle cx="235" cy="78"  r="3.5" fill="#3b82f6"/>
+            <circle cx="270" cy="68"  r="3.5" fill="#3b82f6"/>
+            <circle cx="305" cy="62"  r="3.5" fill="#3b82f6"/>
+            <!-- Regression line (extended to prediction) -->
+            <line x1="60" y1="130" x2="340" y2="48" stroke="#8b5cf6" stroke-width="2" stroke-dasharray="4,3" opacity="0.6"/>
+            <!-- Prediction point -->
+            <circle cx="340" cy="48" r="6" fill="none" stroke="#8b5cf6" stroke-width="2"/>
+            <circle cx="340" cy="48" r="3" fill="#8b5cf6"/>
+            <text x="348" y="45" font-size="10" fill="#8b5cf6" font-weight="600">153.2W</text>
+            <text x="348" y="57" font-size="9"  fill="#64748b">predicted</text>
+            <!-- Labels -->
+            <text x="38" y="24"  text-anchor="end" font-size="9" fill="#64748b">200W</text>
+            <text x="38" y="64"  text-anchor="end" font-size="9" fill="#64748b">150W</text>
+            <text x="38" y="104" text-anchor="end" font-size="9" fill="#64748b">100W</text>
+            <text x="38" y="144" text-anchor="end" font-size="9" fill="#64748b">50W</text>
+            <!-- Legend -->
+            <circle cx="220" cy="15" r="3" fill="#3b82f6"/>
+            <text x="226" y="19" font-size="9" fill="#94a3b8">Actual readings</text>
+            <line x1="295" y1="15" x2="315" y2="15" stroke="#8b5cf6" stroke-width="2" stroke-dasharray="4,3"/>
+            <text x="318" y="19" font-size="9" fill="#94a3b8">np.polyfit</text>
+          </svg>
+        </div>
+
+        <div class="chart-wrap">
+          <div class="chart-title">
+            <i data-lucide="gauge" style="width:14px;height:14px;"></i>
+            Current Power Load
+          </div>
+          <svg viewBox="0 0 380 150" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+            <!-- Gauge background arc -->
+            <path d="M 90 130 A 80 80 0 0 1 290 130"
+              fill="none" stroke="#1e2d45" stroke-width="18" stroke-linecap="round"/>
+            <!-- Green zone -->
+            <path d="M 90 130 A 80 80 0 0 1 215 58"
+              fill="none" stroke="#10b981" stroke-width="18" stroke-linecap="round" opacity="0.35"/>
+            <!-- Amber zone -->
+            <path d="M 215 58 A 80 80 0 0 1 263 73"
+              fill="none" stroke="#f59e0b" stroke-width="18" stroke-linecap="round" opacity="0.35"/>
+            <!-- Red zone -->
+            <path d="M 263 73 A 80 80 0 0 1 290 130"
+              fill="none" stroke="#ef4444" stroke-width="18" stroke-linecap="round" opacity="0.35"/>
+            <!-- Filled value arc (≈62% = 149W of 240W) -->
+            <path d="M 90 130 A 80 80 0 0 1 258 70"
+              fill="none" stroke="#3b82f6" stroke-width="18" stroke-linecap="round" class="gauge-arc"
+              style="--gauge-end: 58;"/>
+            <!-- Center text -->
+            <text x="190" y="118" text-anchor="middle" font-size="28" font-weight="800" fill="#fff">149</text>
+            <text x="190" y="133" text-anchor="middle" font-size="12" fill="#64748b">Watts</text>
+            <!-- Scale labels -->
+            <text x="82"  y="150" text-anchor="middle" font-size="10" fill="#64748b">0</text>
+            <text x="190" y="38"  text-anchor="middle" font-size="10" fill="#64748b">120</text>
+            <text x="298" y="150" text-anchor="middle" font-size="10" fill="#64748b">240</text>
+            <text x="140" y="158" text-anchor="middle" font-size="9" fill="#10b981">SAFE</text>
+            <text x="240" y="158" text-anchor="middle" font-size="9" fill="#ef4444">OVERLOAD</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     SLIDE 5 — Results & Context
+═════════════════════════════════════════════════════════════ -->
+<section id="slide-5">
+  <div class="slide">
+
+    <div class="slide-label">
+      <i data-lucide="bar-chart-3" style="width:14px;height:14px;"></i>
+      Results &amp; Context
+    </div>
+    <h2 class="slide-title">System <span class="gradient-text">Performance &amp; Impact</span></h2>
+    <p class="slide-subtitle">
+      End-to-end latency, free-tier cost analysis, and the real-world energy context for Uganda.
+    </p>
+
+    <!-- KPI cards -->
+    <div class="grid-4" style="margin-bottom:2rem;">
+      <div class="card card-accent">
+        <h3><i data-lucide="timer" style="width:13px;height:13px;"></i> Sensor → Cloud</h3>
+        <div class="value">&lt;2s</div>
+        <div class="desc">MQTT publish to DynamoDB write</div>
+      </div>
+      <div class="card card-green">
+        <h3><i data-lucide="cpu" style="width:13px;height:13px;"></i> Lambda Latency</h3>
+        <div class="value">~1.8s</div>
+        <div class="desc">Including Open-Meteo API call</div>
+      </div>
+      <div class="card card-purple">
+        <h3><i data-lucide="dollar-sign" style="width:13px;height:13px;"></i> Monthly Cost</h3>
+        <div class="value">$0</div>
+        <div class="desc">All services within AWS Free Tier</div>
+      </div>
+      <div class="card card-amber">
+        <h3><i data-lucide="database" style="width:13px;height:13px;"></i> Data Rate</h3>
+        <div class="value">4/min</div>
+        <div class="desc">Writes at 15s publish interval</div>
+      </div>
+    </div>
+
+    <!-- Bar chart: free tier usage -->
+    <div class="grid-2" style="margin-bottom:2rem;">
+      <div class="chart-wrap">
+        <div class="chart-title">
+          <i data-lucide="bar-chart-2" style="width:14px;height:14px;"></i>
+          AWS Free Tier Usage (Monthly Estimate)
+        </div>
+        <svg viewBox="0 0 380 200" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+          <!-- Grid -->
+          <line x1="60" y1="20"  x2="360" y2="20"  stroke="#1e2d45" stroke-width="1"/>
+          <line x1="60" y1="60"  x2="360" y2="60"  stroke="#1e2d45" stroke-width="1"/>
+          <line x1="60" y1="100" x2="360" y2="100" stroke="#1e2d45" stroke-width="1"/>
+          <line x1="60" y1="140" x2="360" y2="140" stroke="#1e2d45" stroke-width="1"/>
+          <line x1="60" y1="160" x2="360" y2="160" stroke="#1e2d45" stroke-width="1"/>
+          <!-- Y labels -->
+          <text x="55" y="24"  text-anchor="end" font-size="9" fill="#64748b">100%</text>
+          <text x="55" y="64"  text-anchor="end" font-size="9" fill="#64748b">75%</text>
+          <text x="55" y="104" text-anchor="end" font-size="9" fill="#64748b">50%</text>
+          <text x="55" y="144" text-anchor="end" font-size="9" fill="#64748b">25%</text>
+          <text x="55" y="164" text-anchor="end" font-size="9" fill="#64748b">10%</text>
+          <!-- Bars -->
+          <!-- IoT Core: ~170k/250k = 68% -->
+          <rect x="80"  y="160" width="50" height="0" rx="4" fill="#3b82f6" class="bar-animated"
+            style="animation-delay:0.1s;" transform="translate(0,0)"/>
+          <rect x="80"  y="52"  width="50" height="108" rx="4" fill="#3b82f6" class="bar-animated"
+            style="animation-delay:0.1s;"/>
+          <text x="105" y="175" text-anchor="middle" font-size="8" fill="#64748b">IoT Core</text>
+          <text x="105" y="48"  text-anchor="middle" font-size="9" fill="#3b82f6" font-weight="700">68%</text>
+          <!-- Lambda: ~170k/1M = 17% -->
+          <rect x="155" y="133" width="50" height="27" rx="4" fill="#8b5cf6" class="bar-animated"
+            style="animation-delay:0.25s;"/>
+          <text x="180" y="175" text-anchor="middle" font-size="8" fill="#64748b">Lambda</text>
+          <text x="180" y="129" text-anchor="middle" font-size="9" fill="#8b5cf6" font-weight="700">17%</text>
+          <!-- DynamoDB: ~170k/200M = ~0.1% — show as small -->
+          <rect x="230" y="157" width="50" height="3" rx="2" fill="#10b981" class="bar-animated"
+            style="animation-delay:0.4s;"/>
+          <text x="255" y="175" text-anchor="middle" font-size="8" fill="#64748b">DynamoDB</text>
+          <text x="255" y="153" text-anchor="middle" font-size="9" fill="#10b981" font-weight="700">&lt;1%</text>
+          <!-- Open-Meteo: free, no limit -->
+          <rect x="305" y="150" width="50" height="10" rx="4" fill="#f59e0b" class="bar-animated"
+            style="animation-delay:0.55s;"/>
+          <text x="330" y="175" text-anchor="middle" font-size="8" fill="#64748b">Open-Meteo</text>
+          <text x="330" y="146" text-anchor="middle" font-size="9" fill="#f59e0b" font-weight="700">Free</text>
+        </svg>
+      </div>
+
+      <!-- Uganda context + map -->
+      <div style="display:flex;flex-direction:column;gap:1.25rem;">
+        <div class="card card-green">
+          <h3><i data-lucide="map-pin" style="width:13px;height:13px;"></i> Uganda Energy Context</h3>
+          <div style="margin-top:0.75rem;border-radius:8px;overflow:hidden;border:1px solid var(--border);">
+            <img src="assets/uganda_map.png" alt="Uganda power grid map"
+              style="width:100%;max-height:160px;object-fit:cover;display:block;" />
+          </div>
+          <p style="font-size:0.8rem;color:var(--muted);margin-top:0.75rem;">
+            Uganda's grid faces irregular voltage supply and overload events — exactly what this system monitors.
+            Coordinates used: <strong style="color:var(--text);">0.3163°N, 32.5822°E</strong> (Kampala).
+          </p>
+        </div>
+
+        <div class="card">
+          <h3><i data-lucide="shield-check" style="width:13px;height:13px;"></i> IoT Security Model</h3>
+          <table class="data-table" style="margin-top:0.5rem;">
+            <thead><tr><th>Layer</th><th>Mechanism</th></tr></thead>
+            <tbody>
+              <tr><td>Transport</td><td>TLS 1.2/1.3, port 8883</td></tr>
+              <tr><td>Identity</td><td>X.509 mutual auth</td></tr>
+              <tr><td>Authz</td><td>Least-privilege IoT policy</td></tr>
+              <tr><td>Topics</td><td>Per-topic ACL (4 actions)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- Live readings table -->
+    <div class="chart-wrap">
+      <div class="chart-title">
+        <i data-lucide="table-2" style="width:14px;height:14px;"></i>
+        Sample DynamoDB Readings (as shown in Grafana)
+      </div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Voltage (V)</th>
+            <th>Current (A)</th>
+            <th>Power (W)</th>
+            <th>Predicted (W)</th>
+            <th>Temp (°C)</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>2026-04-17T14:32:00Z</td>
+            <td>220.50</td><td>0.68</td><td>149.94</td><td>152.80</td><td>26.5</td>
+            <td><span class="badge badge-safe">SAFE</span></td>
+          </tr>
+          <tr>
+            <td>2026-04-17T14:32:15Z</td>
+            <td>221.20</td><td>0.70</td><td>154.84</td><td>156.10</td><td>26.5</td>
+            <td><span class="badge badge-alert">OVERLOAD</span></td>
+          </tr>
+          <tr>
+            <td>2026-04-17T14:32:30Z</td>
+            <td>219.80</td><td>0.65</td><td>142.87</td><td>148.30</td><td>26.5</td>
+            <td><span class="badge badge-safe">SAFE</span></td>
+          </tr>
+          <tr>
+            <td>2026-04-17T14:32:45Z</td>
+            <td>220.10</td><td>0.67</td><td>147.47</td>
+            <td><span class="badge badge-predict">153.20</span></td>
+            <td>26.6</td>
+            <td><span class="badge badge-safe">SAFE</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- Final summary -->
+    <div class="grid-3">
+      <div class="card card-accent" style="text-align:center;">
+        <div style="font-size:2.5rem;font-weight:900;color:var(--accent);">40</div>
+        <div style="font-size:0.85rem;color:var(--muted);margin-top:0.25rem;">Part A — Hardware</div>
+        <div style="font-size:0.75rem;color:var(--muted);">Simulation + OLED + Alerts</div>
+      </div>
+      <div class="card card-green" style="text-align:center;">
+        <div style="font-size:2.5rem;font-weight:900;color:var(--accent3);">30</div>
+        <div style="font-size:0.85rem;color:var(--muted);margin-top:0.25rem;">Part B — Cloud</div>
+        <div style="font-size:0.75rem;color:var(--muted);">ThingSpeak + MATLAB</div>
+      </div>
+      <div class="card card-purple" style="text-align:center;">
+        <div style="font-size:2.5rem;font-weight:900;color:var(--accent2);">30</div>
+        <div style="font-size:0.85rem;color:var(--muted);margin-top:0.25rem;">Part C — AI</div>
+        <div style="font-size:0.75rem;color:var(--muted);">AWS + Lambda + Grafana</div>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:3rem;padding:2rem;background:var(--surface);border:1px solid var(--border);border-radius:12px;">
+      <div style="font-size:3.5rem;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">100/100</div>
+      <div style="font-size:1rem;color:var(--muted);margin-top:0.5rem;">Smart Energy Monitoring System</div>
+      <div style="font-size:0.82rem;color:var(--muted);margin-top:0.25rem;">Caleb · 2026</div>
+    </div>
+
+  </div>
+</section>
+
+
+<footer>
+  <p>Smart Energy Monitoring System &nbsp;·&nbsp; Caleb &nbsp;·&nbsp; 2026</p>
+  <p style="margin-top:0.4rem;">ESP32 &nbsp;·&nbsp; ThingSpeak &nbsp;·&nbsp; AWS IoT Core &nbsp;·&nbsp; Lambda &nbsp;·&nbsp; DynamoDB &nbsp;·&nbsp; Grafana</p>
+</footer>
+
+<script>
+  // Initialise Lucide icons
+  lucide.createIcons();
+
+  // Nav active state on scroll
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks  = document.querySelectorAll('.nav-links a');
+  const observer  = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(a => a.classList.remove('active'));
+        const link = document.querySelector(`.nav-links a[href="#${entry.target.id}"]`);
+        if (link) link.classList.add('active');
+      }
+    });
+  }, { threshold: 0.4 });
+  sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>
