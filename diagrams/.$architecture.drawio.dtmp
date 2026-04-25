@@ -106,13 +106,15 @@
         <mxCell id="arr-6" value="⑥ HTTP GET temperature&#xa;urllib (no external deps)&#xa;Fallback: 25°C if unavailable" style="edgeStyle=orthogonalEdgeStyle;html=1;              exitX=1;exitY=0.55;exitDx=0;exitDy=0;              entryX=0;entryY=0.5;entryDx=0;entryDy=0;              strokeColor=#1e8449;fontColor=#000000;fontSize=11;fontStyle=1;              strokeWidth=3;startArrow=none;endArrow=block;endFill=1;" parent="1" source="lambda-box" target="meteo-box" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="arr-7" value="⑦ HTTP GET — Lambda Function URL&#xa;Returns last 50 readings as JSON array&#xa;Used by Grafana Infinity plugin" style="edgeStyle=orthogonalEdgeStyle;html=1;              exitX=1;exitY=0.85;exitDx=0;exitDy=0;              entryX=0;entryY=0.5;entryDx=0;entryDy=0;              strokeColor=#8e2f00;fontColor=#000000;fontSize=11;fontStyle=1;              strokeWidth=3;startArrow=none;endArrow=block;endFill=1;" parent="1" source="lambda-box" target="grafana-box" edge="1">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="arr-7" value="&lt;span style=&quot;background-color: rgb(0, 0, 0);&quot;&gt;⑦ HTTP GET — Lambda Function URL&lt;br&gt;Returns last 50 readings as JSON array&lt;br&gt;Used by Grafana Infinity plugin&lt;/span&gt;" style="edgeStyle=orthogonalEdgeStyle;html=1;              exitX=1;exitY=0.85;exitDx=0;exitDy=0;              entryX=0;entryY=0.5;entryDx=0;entryDy=0;              strokeColor=#8e2f00;fontColor=#000000;fontSize=11;fontStyle=1;              strokeWidth=3;startArrow=none;endArrow=block;endFill=1;" parent="1" source="lambda-box" target="grafana-box" edge="1">
+          <mxGeometry x="0.0035" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
         </mxCell>
         <mxCell id="arr-8" value="⑧ Publish prediction&#xa;Topic: energy/predictions&#xa;{predicted_power, alert}" style="edgeStyle=orthogonalEdgeStyle;html=1;              exitX=0.15;exitY=0;exitDx=0;exitDy=0;              entryX=0.15;entryY=1;entryDx=0;entryDy=0;              strokeColor=#6c3483;fontColor=#000000;fontSize=11;fontStyle=1;              strokeWidth=2;dashed=1;startArrow=none;endArrow=block;endFill=1;" parent="1" source="lambda-box" target="iot-box" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="arr-9" value="⑨ MQTT message delivered&#xa;Topic: energy/predictions&#xa;ESP32 shows &#39;AI: xxx.xW&#39; on OLED" style="edgeStyle=orthogonalEdgeStyle;html=1;              exitX=0;exitY=0.88;exitDx=0;exitDy=0;              entryX=1;entryY=0.88;entryDx=0;entryDy=0;              strokeColor=#2d7600;fontColor=#000000;fontSize=11;fontStyle=1;              strokeWidth=2;dashed=1;startArrow=none;endArrow=block;endFill=1;" parent="1" edge="1">
+        <mxCell id="arr-9" value="&lt;span&gt;⑨ MQTT message delivered&lt;br&gt;Topic: energy/predictions&lt;br&gt;ESP32 shows &#39;AI: xxx.xW&#39; on OLED&lt;/span&gt;" style="edgeStyle=orthogonalEdgeStyle;html=1;              exitX=0;exitY=0.88;exitDx=0;exitDy=0;              entryX=1;entryY=0.88;entryDx=0;entryDy=0;              strokeColor=#2d7600;fontColor=#000000;fontSize=11;fontStyle=1;              strokeWidth=2;dashed=1;startArrow=none;endArrow=block;endFill=1;" parent="1" edge="1">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="825" y="527" />
@@ -141,13 +143,13 @@
           <mxGeometry x="75" y="762" width="330" height="32" as="geometry" />
         </mxCell>
         <mxCell id="flow-summary" value="DATA FLOW SEQUENCE&#xa;① ESP32 reads ADC → P = V × I every 500ms&#xa;② HTTP GET → ThingSpeak (field1–4) every 15s&#xa;③ MATLAB smooths data, React sends email alert&#xa;④ ESP32 publishes MQTT JSON → IoT Core every 15s&#xa;⑤ IoT Rule fires Lambda synchronously&#xa;⑥ Lambda: PutItem + Query last 10 readings&#xa;⑦ Lambda: HTTP GET → Open-Meteo temperature&#xa;⑧ Lambda: np.polyfit regression → predict next W&#xa;⑨ Lambda: publish prediction → energy/predictions&#xa;⑩ IoT Core delivers to ESP32 → OLED shows AI: xxxW&#xa;⑪ Grafana HTTP GET Lambda URL → live dashboard" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fdfefe;strokeColor=#1a252f;              fontSize=12;fontStyle=1;fontColor=#000000;verticalAlign=top;align=left;              strokeWidth=3;spacingLeft=12;" parent="1" vertex="1">
-          <mxGeometry x="460" y="580" width="420" height="280" as="geometry" />
+          <mxGeometry x="405" y="820" width="420" height="280" as="geometry" />
         </mxCell>
         <mxCell id="security-note" value="SECURITY MODEL&#xa;• Transport: TLS 1.2, Port 8883&#xa;• Identity: X.509 Mutual Auth&#xa;• Policy: Least-privilege (4 actions only)&#xa;  - iot:Connect  client/esp32-001&#xa;  - iot:Publish  topic/energy/monitor&#xa;  - iot:Subscribe topicfilter/energy/predictions&#xa;  - iot:Receive  topic/energy/predictions" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fdfefe;strokeColor=#1a252f;              fontSize=12;fontStyle=1;fontColor=#000000;verticalAlign=top;align=left;              strokeWidth=3;spacingLeft=12;" parent="1" vertex="1">
-          <mxGeometry x="960" y="820" width="380" height="200" as="geometry" />
+          <mxGeometry x="870" y="860" width="380" height="200" as="geometry" />
         </mxCell>
         <mxCell id="aws-note" value="AWS FREE TIER (Monthly)&#xa;• IoT Core: 250,000 msgs/mo free&#xa;• Lambda: 1,000,000 invocations/mo free&#xa;• DynamoDB: 25 GB + 200M reqs/mo free&#xa;• Lambda Function URL: free&#xa;Total cost at project scale: $0.00" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fdfefe;strokeColor=#1a252f;              fontSize=12;fontStyle=1;fontColor=#000000;verticalAlign=top;align=left;              strokeWidth=3;spacingLeft=12;" parent="1" vertex="1">
-          <mxGeometry x="1360" y="860" width="300" height="160" as="geometry" />
+          <mxGeometry x="1350" y="880" width="300" height="160" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>

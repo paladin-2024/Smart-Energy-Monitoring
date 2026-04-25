@@ -1,0 +1,420 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxGraphModel dx="1600" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1920" pageHeight="1360" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+
+    <!-- ══════════════════════════════════════════════ -->
+    <!-- TITLE -->
+    <!-- ══════════════════════════════════════════════ -->
+    <mxCell id="title" value="Smart Energy Monitoring System — Full Architecture &amp; Data Flow"
+      style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;
+             whiteSpace=wrap;rounded=0;fontSize=22;fontStyle=1;fontColor=#000000;"
+      vertex="1" parent="1">
+      <mxGeometry x="200" y="20" width="1520" height="50" as="geometry" />
+    </mxCell>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- PART A LABEL -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <mxCell id="label-a" value="PART A — Hardware Simulation (40 marks)"
+      style="text;html=1;strokeColor=#2d7600;fillColor=#c3e6b0;align=center;
+             verticalAlign=middle;fontSize=13;fontStyle=1;fontColor=#000000;rounded=1;"
+      vertex="1" parent="1">
+      <mxGeometry x="60" y="80" width="320" height="32" as="geometry" />
+    </mxCell>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- ESP32 DEVICE BOX -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <mxCell id="esp32-box" value="ESP32 WROOM-32&#xa;(Wokwi Simulation)"
+      style="rounded=1;whiteSpace=wrap;html=1;fillColor=#6aaf43;strokeColor=#2d7600;
+             fontSize=15;fontStyle=1;fontColor=#000000;verticalAlign=top;strokeWidth=3;"
+      vertex="1" parent="1">
+      <mxGeometry x="60" y="120" width="320" height="410" as="geometry" />
+    </mxCell>
+
+    <mxCell id="pot1" value="Potentiometer 1 → GPIO34&#xa;Simulates Voltage: 0 – 240 V&#xa;ADC1 (safe with WiFi)"
+      style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff3b0;strokeColor=#b8860b;
+             fontSize=12;fontStyle=1;fontColor=#000000;strokeWidth=2;"
+      vertex="1" parent="1">
+      <mxGeometry x="80" y="165" width="280" height="60" as="geometry" />
+    </mxCell>
+
+    <mxCell id="pot2" value="Potentiometer 2 → GPIO35&#xa;Simulates Current: 0 – 10 A&#xa;ADC1 (safe with WiFi)"
+      style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff3b0;strokeColor=#b8860b;
+             fontSize=12;fontStyle=1;fontColor=#000000;strokeWidth=2;"
+      vertex="1" parent="1">
+      <mxGeometry x="80" y="240" width="280" height="60" as="geometry" />
+    </mxCell>
+
+    <mxCell id="formula-cell" value="Power Calculation&#xa;P = V × I (Watts)&#xa;Alert if P &gt; 150 W"
+      style="rounded=1;whiteSpace=wrap;html=1;fillColor=#c9b8e8;strokeColor=#6a4c9c;
+             fontSize=12;fontStyle=1;fontColor=#000000;strokeWidth=2;"
+      vertex="1" parent="1">
+      <mxGeometry x="80" y="315" width="280" height="60" as="geometry" />
+    </mxCell>
+
+    <mxCell id="oled" value="SSD1306 OLED 128×64&#xa;I2C: SDA=GPIO21 / SCL=GPIO22&#xa;Shows V, I, P, Status, AI Prediction"
+      style="rounded=1;whiteSpace=wrap;html=1;fillColor=#7ec8e3;strokeColor=#1a6e8a;
+             fontSize=12;fontStyle=1;fontColor=#000000;strokeWidth=2;"
+      vertex="1" parent="1">
+      <mxGeometry x="80" y="390" width="280" height="60" as="geometry" />
+    </mxCell>
+
+    <mxCell id="leds" value="Green LED GPIO25 → SAFE&#xa;Red LED GPIO26 → OVERLOAD&#xa;Buzzer GPIO27 → Audible alert"
+      style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5a0a0;strokeColor=#c0392b;
+             fontSize=12;fontStyle=1;fontColor=#000000;strokeWidth=2;"
+      vertex="1" parent="1">
+      <mxGeometry x="80" y="465" width="280" height="55" as="geometry" />
+    </mxCell>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- PART B LABEL -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <mxCell id="label-b" value="PART B — ThingSpeak Cloud (30 marks)"
+      style="text;html=1;strokeColor=#1a5c99;fillColor=#9dc9f5;align=center;
+             verticalAlign=middle;fontSize=13;fontStyle=1;fontColor=#000000;rounded=1;"
+      vertex="1" parent="1">
+      <mxGeometry x="460" y="80" width="340" height="32" as="geometry" />
+    </mxCell>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- THINGSPEAK BOX -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <mxCell id="ts-box" value="ThingSpeak Cloud"
+      style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4a9fe0;strokeColor=#1a5c99;
+             fontSize=15;fontStyle=1;fontColor=#000000;verticalAlign=top;strokeWidth=3;"
+      vertex="1" parent="1">
+      <mxGeometry x="460" y="120" width="340" height="300" as="geometry" />
+    </mxCell>
+
+    <mxCell id="ts-channel" value="Channel Fields&#xa;field1 = Voltage (V)&#xa;field2 = Current (A)&#xa;field3 = Power (W)&#xa;field4 = Alert (0 or 1)"
+      style="rounded=1;whiteSpace=wrap;html=1;fillColor=#9dc9f5;strokeColor=#1a5c99;
+             fontSize=12;fontStyle=1;fontColor=#000000;strokeWidth=2;"
+      vertex="1" parent="1">
+      <mxGeometry x="478" y="158" width="304" height="90" as="geometry" />
+    </mxCell>
+
+    <mxCell id="ts-matlab" value="MATLAB Analysis&#xa;movmean(data, 10) → Moving Average&#xa;Overload event markers"
+      style="rounded=1;whiteSpace=wrap;html=1;fillColor=#9dc9f5;strokeColor=#1a5c99;
+             fontSize=12;fontStyle=1;fontColor=#000000;strokeWidth=2;"
+      vertex="1" parent="1">
+      <mxGeometry x="478" y="260" width="304" height="60" as="geometry" />
+    </mxCell>
+
+    <mxCell id="ts-alert" value="React Alert → Email Notification&#xa;Triggers when field4 = 1 (OVERLOAD)"
+      style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5a0a0;strokeColor=#c0392b;
+             fontSize=12;fontStyle=1;fontColor=#000000;strokeWidth=2;"
+      vertex="1" parent="1">
+      <mxGeometry x="478" y="334" width="304" height="50" as="geometry" />
+    </mxCell>
+
+    <!-- MATLAB box below ThingSpeak -->
+    <mxCell id="matlab-box" value="MATLAB Analysis Script&#xa;(runs in ThingSpeak cloud)&#xa;Smooth noise + detect overloads&#xa;Summary stats: mean, max, std"
+      style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4a9fe0;strokeColor=#1a5c99;
+             fontSize=12;fontStyle=1;fontColor=#000000;strokeWidth=2;"
+      vertex="1" parent="1">
+      <mxGeometry x="460" y="450" width="340" height="90" as="geometry" />
+    </mxCell>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- PART C LABEL -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <mxCell id="label-c" value="PART C — AWS IoT Core + AI (30 marks)"
+      style="text;html=1;strokeColor=#b36200;fillColor=#ffc97a;align=center;
+             verticalAlign=middle;fontSize=13;fontStyle=1;fontColor=#000000;rounded=1;"
+      vertex="1" parent="1">
+      <mxGeometry x="880" y="80" width="360" height="32" as="geometry" />
+    </mxCell>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- AWS IOT CORE BOX -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <mxCell id="iot-box" value="AWS IoT Core"
+      style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5a623;strokeColor=#b36200;
+             fontSize=15;fontStyle=1;fontColor=#000000;verticalAlign=top;strokeWidth=3;"
+      vertex="1" parent="1">
+      <mxGeometry x="880" y="120" width="360" height="220" as="geometry" />
+    </mxCell>
+
+    <mxCell id="iot-broker" value="MQTT Message Broker&#xa;Protocol: MQTT over TLS 1.2&#xa;Port: 8883 (encrypted)&#xa;Auth: X.509 Mutual Certificates"
+      style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffc97a;strokeColor=#b36200;
+             fontSize=12;fontStyle=1;fontColor=#000000;strokeWidth=2;"
+      vertex="1" parent="1">
+      <mxGeometry x="898" y="160" width="324" height="80" as="geometry" />
+    </mxCell>
+
+    <mxCell id="iot-rule" value="IoT Rule: EnergyMonitorRule&#xa;SQL: SELECT * FROM 'energy/monitor'&#xa;Action: Trigger Lambda on every message"
+      style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffc97a;strokeColor=#b36200;
+             fontSize=12;fontStyle=1;fontColor=#000000;strokeWidth=2;"
+      vertex="1" parent="1">
+      <mxGeometry x="898" y="252" width="324" height="70" as="geometry" />
+    </mxCell>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- LAMBDA BOX -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <mxCell id="lambda-box" value="AWS Lambda — Python 3.11&#xa;SmartEnergyMonitor function"
+      style="rounded=1;whiteSpace=wrap;html=1;fillColor=#9b59b6;strokeColor=#6c3483;
+             fontSize=15;fontStyle=1;fontColor=#000000;verticalAlign=top;strokeWidth=3;"
+      vertex="1" parent="1">
+      <mxGeometry x="880" y="380" width="360" height="400" as="geometry" />
+    </mxCell>
+
+    <mxCell id="lam-1" value="Step 1: Parse MQTT JSON payload&#xa;→ extract deviceId, voltage, current, power"
+      style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d7bde2;strokeColor=#6c3483;
+             fontSize=12;fontStyle=1;fontColor=#000000;strokeWidth=2;"
+      vertex="1" parent="1">
+      <mxGeometry x="898" y="428" width="324" height="50" as="geometry" />
+    </mxCell>
+
+    <mxCell id="lam-2" value="Step 2: Write reading to DynamoDB&#xa;→ PutItem with deviceId + ISO timestamp key"
+      style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d7bde2;strokeColor=#6c3483;
+             fontSize=12;fontStyle=1;fontColor=#000000;strokeWidth=2;"
+      vertex="1" parent="1">
+      <mxGeometry x="898" y="485" width="324" height="50" as="geometry" />
+    </mxCell>
+
+    <mxCell id="lam-3" value="Step 3: Query last 10 readings from DynamoDB&#xa;→ ScanIndexForward=False, Limit=10"
+      style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d7bde2;strokeColor=#6c3483;
+             fontSize=12;fontStyle=1;fontColor=#000000;strokeWidth=2;"
+      vertex="1" parent="1">
+      <mxGeometry x="898" y="542" width="324" height="50" as="geometry" />
+    </mxCell>
+
+    <mxCell id="lam-4" value="Step 4: Call Open-Meteo API&#xa;→ fetch ambient temperature (Kampala, UG)"
+      style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d7bde2;strokeColor=#6c3483;
+             fontSize=12;fontStyle=1;fontColor=#000000;strokeWidth=2;"
+      vertex="1" parent="1">
+      <mxGeometry x="898" y="599" width="324" height="50" as="geometry" />
+    </mxCell>
+
+    <mxCell id="lam-5" value="Step 5: NumPy Linear Regression&#xa;→ np.polyfit(x, y, 1) → predict next power value"
+      style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d7bde2;strokeColor=#6c3483;
+             fontSize=12;fontStyle=1;fontColor=#000000;strokeWidth=2;"
+      vertex="1" parent="1">
+      <mxGeometry x="898" y="656" width="324" height="50" as="geometry" />
+    </mxCell>
+
+    <mxCell id="lam-6" value="Step 6: Apply corrections (temp +0.5%/°C, peak ×0.85)&#xa;→ update DynamoDB item with predicted_power"
+      style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d7bde2;strokeColor=#6c3483;
+             fontSize=12;fontStyle=1;fontColor=#000000;strokeWidth=2;"
+      vertex="1" parent="1">
+      <mxGeometry x="898" y="713" width="324" height="50" as="geometry" />
+    </mxCell>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- RIGHT COLUMN: DynamoDB, Open-Meteo, Grafana -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+
+    <!-- DynamoDB -->
+    <mxCell id="dynamo-box" value="AWS DynamoDB&#xa;Table: EnergyReadings&#xa;PK: deviceId (String)&#xa;SK: timestamp (ISO 8601 String)&#xa;Billing: PAY_PER_REQUEST (free tier)"
+      style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8c300;strokeColor=#9a7d00;
+             fontSize=13;fontStyle=1;fontColor=#000000;strokeWidth=3;"
+      vertex="1" parent="1">
+      <mxGeometry x="1340" y="380" width="320" height="130" as="geometry" />
+    </mxCell>
+
+    <!-- Open-Meteo -->
+    <mxCell id="meteo-box" value="Open-Meteo Weather API&#xa;Free — No API key required&#xa;Location: Kampala, Uganda&#xa;(0.3163°N, 32.5822°E)&#xa;Returns: current temperature (°C)"
+      style="rounded=1;whiteSpace=wrap;html=1;fillColor=#52be80;strokeColor=#1e8449;
+             fontSize=13;fontStyle=1;fontColor=#000000;strokeWidth=3;"
+      vertex="1" parent="1">
+      <mxGeometry x="1340" y="540" width="320" height="130" as="geometry" />
+    </mxCell>
+
+    <!-- Grafana -->
+    <mxCell id="grafana-box" value="Grafana Cloud&#xa;Infinity Data Source Plugin&#xa;Panel 1: Time series — Power + AI Prediction&#xa;Panel 2: Table — All readings + alerts&#xa;Source: Lambda Function URL (HTTP GET)"
+      style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e05c2a;strokeColor=#8e2f00;
+             fontSize=13;fontStyle=1;fontColor=#000000;strokeWidth=3;"
+      vertex="1" parent="1">
+      <mxGeometry x="1340" y="700" width="320" height="130" as="geometry" />
+    </mxCell>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- DATA FLOW ARROWS — numbered -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+
+    <!-- [1] ESP32 → ThingSpeak: HTTP POST -->
+    <mxCell id="arr-1" value="① HTTP GET every 15s&#xa;field1=V &amp;field2=I &amp;field3=P &amp;field4=alert&#xa;via WiFi (HTTPClient)"
+      style="edgeStyle=orthogonalEdgeStyle;html=1;
+             exitX=1;exitY=0.35;exitDx=0;exitDy=0;
+             entryX=0;entryY=0.35;entryDx=0;entryDy=0;
+             strokeColor=#1a5c99;fontColor=#000000;fontSize=11;fontStyle=1;
+             strokeWidth=3;startArrow=none;endArrow=block;endFill=1;"
+      edge="1" source="esp32-box" target="ts-box" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- [2] ThingSpeak → MATLAB (internal flow) -->
+    <mxCell id="arr-2" value="② Runs MATLAB Analysis&#xa;automatically on channel data"
+      style="edgeStyle=orthogonalEdgeStyle;html=1;
+             exitX=0.5;exitY=1;exitDx=0;exitDy=0;
+             entryX=0.5;entryY=0;entryDx=0;entryDy=0;
+             strokeColor=#1a5c99;fontColor=#000000;fontSize=11;fontStyle=1;
+             strokeWidth=2;startArrow=none;endArrow=block;endFill=1;"
+      edge="1" source="ts-box" target="matlab-box" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- [3] ESP32 → IoT Core: MQTT/TLS -->
+    <mxCell id="arr-3" value="③ MQTT/TLS Port 8883&#xa;Topic: energy/monitor&#xa;JSON: {deviceId, V, I, P, alert, timestamp}&#xa;Every 15 seconds"
+      style="edgeStyle=orthogonalEdgeStyle;html=1;
+             exitX=1;exitY=0.72;exitDx=0;exitDy=0;
+             entryX=0;entryY=0.5;entryDx=0;entryDy=0;
+             strokeColor=#b36200;fontColor=#000000;fontSize=11;fontStyle=1;
+             strokeWidth=3;startArrow=none;endArrow=block;endFill=1;"
+      edge="1" source="esp32-box" target="iot-box" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- [4] IoT Core → Lambda: trigger -->
+    <mxCell id="arr-4" value="④ IoT Rule fires Lambda&#xa;synchronous invocation&#xa;event = MQTT JSON payload"
+      style="edgeStyle=orthogonalEdgeStyle;html=1;
+             exitX=0.5;exitY=1;exitDx=0;exitDy=0;
+             entryX=0.5;entryY=0;entryDx=0;entryDy=0;
+             strokeColor=#6c3483;fontColor=#000000;fontSize=11;fontStyle=1;
+             strokeWidth=3;startArrow=none;endArrow=block;endFill=1;"
+      edge="1" source="iot-box" target="lambda-box" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- [5] Lambda → DynamoDB: put_item + query -->
+    <mxCell id="arr-5" value="⑤ boto3 PutItem (write)&#xa;+ Query last 10 readings&#xa;ScanIndexForward=False"
+      style="edgeStyle=orthogonalEdgeStyle;html=1;
+             exitX=1;exitY=0.28;exitDx=0;exitDy=0;
+             entryX=0;entryY=0.5;entryDx=0;entryDy=0;
+             strokeColor=#9a7d00;fontColor=#000000;fontSize=11;fontStyle=1;
+             strokeWidth=3;startArrow=none;endArrow=block;endFill=1;"
+      edge="1" source="lambda-box" target="dynamo-box" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- [6] Lambda → Open-Meteo: HTTP GET -->
+    <mxCell id="arr-6" value="⑥ HTTP GET temperature&#xa;urllib (no external deps)&#xa;Fallback: 25°C if unavailable"
+      style="edgeStyle=orthogonalEdgeStyle;html=1;
+             exitX=1;exitY=0.55;exitDx=0;exitDy=0;
+             entryX=0;entryY=0.5;entryDx=0;entryDy=0;
+             strokeColor=#1e8449;fontColor=#000000;fontSize=11;fontStyle=1;
+             strokeWidth=3;startArrow=none;endArrow=block;endFill=1;"
+      edge="1" source="lambda-box" target="meteo-box" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- [7] Lambda → Grafana: Function URL -->
+    <mxCell id="arr-7" value="⑦ HTTP GET — Lambda Function URL&#xa;Returns last 50 readings as JSON array&#xa;Used by Grafana Infinity plugin"
+      style="edgeStyle=orthogonalEdgeStyle;html=1;
+             exitX=1;exitY=0.85;exitDx=0;exitDy=0;
+             entryX=0;entryY=0.5;entryDx=0;entryDy=0;
+             strokeColor=#8e2f00;fontColor=#000000;fontSize=11;fontStyle=1;
+             strokeWidth=3;startArrow=none;endArrow=block;endFill=1;"
+      edge="1" source="lambda-box" target="grafana-box" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- [8] Lambda → IoT Core: publish prediction (back) -->
+    <mxCell id="arr-8" value="⑧ Publish prediction&#xa;Topic: energy/predictions&#xa;{predicted_power, alert}"
+      style="edgeStyle=orthogonalEdgeStyle;html=1;
+             exitX=0.15;exitY=0;exitDx=0;exitDy=0;
+             entryX=0.15;entryY=1;entryDx=0;entryDy=0;
+             strokeColor=#6c3483;fontColor=#000000;fontSize=11;fontStyle=1;
+             strokeWidth=2;dashed=1;startArrow=none;endArrow=block;endFill=1;"
+      edge="1" source="lambda-box" target="iot-box" parent="1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+
+    <!-- [9] IoT Core → ESP32: deliver prediction -->
+    <mxCell id="arr-9" value="⑨ MQTT message delivered&#xa;Topic: energy/predictions&#xa;ESP32 shows 'AI: xxx.xW' on OLED"
+      style="edgeStyle=orthogonalEdgeStyle;html=1;
+             exitX=0;exitY=0.88;exitDx=0;exitDy=0;
+             entryX=1;entryY=0.88;entryDx=0;entryDy=0;
+             strokeColor=#2d7600;fontColor=#000000;fontSize=11;fontStyle=1;
+             strokeWidth=2;dashed=1;startArrow=none;endArrow=block;endFill=1;"
+      edge="1" source="iot-box" target="esp32-box" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="820" y="527" />
+          <mxPoint x="820" y="482" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- LEGEND BOX -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <mxCell id="legend-box" value="LEGEND"
+      style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0f0f0;strokeColor=#333333;
+             fontSize=14;fontStyle=1;fontColor=#000000;verticalAlign=top;strokeWidth=3;"
+      vertex="1" parent="1">
+      <mxGeometry x="60" y="580" width="360" height="240" as="geometry" />
+    </mxCell>
+
+    <mxCell id="leg1" value="Part A — ESP32 Hardware Simulation"
+      style="text;html=1;strokeColor=#2d7600;fillColor=#6aaf43;align=left;
+             verticalAlign=middle;fontSize=12;fontStyle=1;fontColor=#000000;rounded=1;strokeWidth=2;"
+      vertex="1" parent="1">
+      <mxGeometry x="75" y="610" width="330" height="32" as="geometry" />
+    </mxCell>
+
+    <mxCell id="leg2" value="Part B — ThingSpeak Cloud + MATLAB"
+      style="text;html=1;strokeColor=#1a5c99;fillColor=#4a9fe0;align=left;
+             verticalAlign=middle;fontSize=12;fontStyle=1;fontColor=#000000;rounded=1;strokeWidth=2;"
+      vertex="1" parent="1">
+      <mxGeometry x="75" y="648" width="330" height="32" as="geometry" />
+    </mxCell>
+
+    <mxCell id="leg3" value="Part C — AWS IoT Core + Lambda"
+      style="text;html=1;strokeColor=#b36200;fillColor=#f5a623;align=left;
+             verticalAlign=middle;fontSize=12;fontStyle=1;fontColor=#000000;rounded=1;strokeWidth=2;"
+      vertex="1" parent="1">
+      <mxGeometry x="75" y="686" width="330" height="32" as="geometry" />
+    </mxCell>
+
+    <mxCell id="leg4" value="AI Prediction Pipeline — NumPy + Lambda"
+      style="text;html=1;strokeColor=#6c3483;fillColor=#9b59b6;align=left;
+             verticalAlign=middle;fontSize=12;fontStyle=1;fontColor=#000000;rounded=1;strokeWidth=2;"
+      vertex="1" parent="1">
+      <mxGeometry x="75" y="724" width="330" height="32" as="geometry" />
+    </mxCell>
+
+    <mxCell id="leg5" value="Storage + Dashboards — DynamoDB + Grafana"
+      style="text;html=1;strokeColor=#9a7d00;fillColor=#e8c300;align=left;
+             verticalAlign=middle;fontSize=12;fontStyle=1;fontColor=#000000;rounded=1;strokeWidth=2;"
+      vertex="1" parent="1">
+      <mxGeometry x="75" y="762" width="330" height="32" as="geometry" />
+    </mxCell>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- DATA FLOW SUMMARY BOX -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <mxCell id="flow-summary" value="DATA FLOW SEQUENCE&#xa;① ESP32 reads ADC → P = V × I every 500ms&#xa;② HTTP GET → ThingSpeak (field1–4) every 15s&#xa;③ MATLAB smooths data, React sends email alert&#xa;④ ESP32 publishes MQTT JSON → IoT Core every 15s&#xa;⑤ IoT Rule fires Lambda synchronously&#xa;⑥ Lambda: PutItem + Query last 10 readings&#xa;⑦ Lambda: HTTP GET → Open-Meteo temperature&#xa;⑧ Lambda: np.polyfit regression → predict next W&#xa;⑨ Lambda: publish prediction → energy/predictions&#xa;⑩ IoT Core delivers to ESP32 → OLED shows AI: xxxW&#xa;⑪ Grafana HTTP GET Lambda URL → live dashboard"
+      style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fdfefe;strokeColor=#1a252f;
+             fontSize=12;fontStyle=1;fontColor=#000000;verticalAlign=top;align=left;
+             strokeWidth=3;spacingLeft=12;"
+      vertex="1" parent="1">
+      <mxGeometry x="460" y="580" width="420" height="280" as="geometry" />
+    </mxCell>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- SECURITY NOTE -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <mxCell id="security-note" value="SECURITY MODEL&#xa;• Transport: TLS 1.2, Port 8883&#xa;• Identity: X.509 Mutual Auth&#xa;• Policy: Least-privilege (4 actions only)&#xa;  - iot:Connect  client/esp32-001&#xa;  - iot:Publish  topic/energy/monitor&#xa;  - iot:Subscribe topicfilter/energy/predictions&#xa;  - iot:Receive  topic/energy/predictions"
+      style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fdfefe;strokeColor=#1a252f;
+             fontSize=12;fontStyle=1;fontColor=#000000;verticalAlign=top;align=left;
+             strokeWidth=3;spacingLeft=12;"
+      vertex="1" parent="1">
+      <mxGeometry x="960" y="820" width="380" height="200" as="geometry" />
+    </mxCell>
+
+    <!-- AWS SERVICES NOTE -->
+    <mxCell id="aws-note" value="AWS FREE TIER (Monthly)&#xa;• IoT Core: 250,000 msgs/mo free&#xa;• Lambda: 1,000,000 invocations/mo free&#xa;• DynamoDB: 25 GB + 200M reqs/mo free&#xa;• Lambda Function URL: free&#xa;Total cost at project scale: $0.00"
+      style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fdfefe;strokeColor=#1a252f;
+             fontSize=12;fontStyle=1;fontColor=#000000;verticalAlign=top;align=left;
+             strokeWidth=3;spacingLeft=12;"
+      vertex="1" parent="1">
+      <mxGeometry x="1360" y="860" width="300" height="160" as="geometry" />
+    </mxCell>
+
+  </root>
+</mxGraphModel>

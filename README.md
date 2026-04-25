@@ -189,7 +189,10 @@ Publishes MQTT messages to AWS IoT Core over TLS. An IoT Rule triggers a Lambda 
 - **AWS Free Tier:** Lambda (1M requests/month), DynamoDB (25GB storage), IoT Core (250K messages/month) — all within free tier for this project's scale.
 
 ---
-
+- TFT_eSPI by Bodmer — TFT display driver                                                      
+  - ArduinoJson — for ThingSpeak payload                                                         
+  - ESP8266WiFi — built into ESP8266 core                                                        
+  - ESP8266HTTPClient — built into ESP8266 core
 ## License
 
 MIT License — see [LICENSE](LICENSE) for details.
