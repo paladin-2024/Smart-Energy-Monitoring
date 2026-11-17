@@ -7,7 +7,7 @@
 ![Dashboard](https://img.shields.io/badge/dashboard-Grafana%20Cloud-orange)
 ![Simulation](https://img.shields.io/badge/simulation-Wokwi-blueviolet)
 
-> A full-stack IoT system that monitors electricity consumption in real time using an ESP32 microcontroller, streams data to ThingSpeak and AWS IoT Core, and applies AI-powered linear regression to predict future power consumption — built in the context of Uganda's energy challenges.
+> A full-stack IoT system that monitors electricity consumption in real time using an ESP32 microcontroller, streams data to ThingSpeak and AWS IoT Core, and applies AI-powered linear regression to predict future power consumption — built in the context of Uganda's energy challenges of not knowing how much is consummed and also how we can have insight and how to pay.
 
 ---
 
