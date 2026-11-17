@@ -1,0 +1,95 @@
+{
+  "version": 1,
+  "author": "Caleb",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "wokwi-esp32-devkit-v1",
+      "id": "esp",
+      "top": 80,
+      "left": 140,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-ssd1306",
+      "id": "oled1",
+      "top": -80,
+      "left": -180,
+      "attrs": { "i2cAddress": "0x3c" }
+    },
+    {
+      "type": "wokwi-potentiometer",
+      "id": "pot1",
+      "top": 220,
+      "left": -180,
+      "attrs": { "value": "0.5" }
+    },
+    {
+      "type": "wokwi-potentiometer",
+      "id": "pot2",
+      "top": 340,
+      "left": -180,
+      "attrs": { "value": "0.3" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "ledG",
+      "top": 20,
+      "left": 420,
+      "attrs": { "color": "green" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r1",
+      "top": 58,
+      "left": 372,
+      "attrs": { "value": "220" }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "ledR",
+      "top": 130,
+      "left": 420,
+      "attrs": { "color": "red" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r2",
+      "top": 168,
+      "left": 372,
+      "attrs": { "value": "220" }
+    },
+    {
+      "type": "wokwi-buzzer",
+      "id": "bz1",
+      "top": 240,
+      "left": 400,
+      "attrs": { "volume": "0.1" }
+    }
+  ],
+  "connections": [
+    ["esp:3V3.1",  "oled1:VCC", "red",      []],
+    ["esp:GND.1",  "oled1:GND", "black",    []],
+    ["esp:D21",    "oled1:SDA", "green",    []],
+    ["esp:D22",    "oled1:SCL", "blue",     []],
+
+    ["esp:3V3.2",  "pot1:VCC",  "red",      []],
+    ["esp:GND.2",  "pot1:GND",  "black",    []],
+    ["esp:D34",    "pot1:SIG",  "yellow",   []],
+
+    ["esp:3V3.3",  "pot2:VCC",  "red",      []],
+    ["esp:GND.3",  "pot2:GND",  "black",    []],
+    ["esp:D35",    "pot2:SIG",  "orange",   []],
+
+    ["esp:D26",    "r1:2",      "limegreen",[]],
+    ["r1:1",       "ledG:A",    "limegreen",[]],
+    ["ledG:C",     "esp:GND.4", "black",    []],
+
+    ["esp:D27",    "r2:2",      "tomato",   []],
+    ["r2:1",       "ledR:A",    "tomato",   []],
+    ["ledR:C",     "esp:GND.5", "black",    []],
+
+    ["esp:D25",    "bz1:1",     "purple",   []],
+    ["bz1:2",      "esp:GND.6", "black",    []]
+  ]
+}

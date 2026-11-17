@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Smart Energy Monitoring System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet"/>
+<style>
+/* ── DESIGN TOKENS ───────────────────────────────────────────────── */
+:root {
+  --bg:      #0D0D0F;
+  --ink:     #F5F4EF;
+  --muted:   rgba(245,244,239,.42);
+  --ghost:   rgba(245,244,239,.07);
+  --border:  rgba(245,244,239,.1);
+  --surface: rgba(245,244,239,.04);
+  --green:   #10B981;
+  --green-d: rgba(16,185,129,.12);
+  --green-g: rgba(16,185,129,.5);
+  --danger:  #ef4444;
+  --f-head:  'Syne', sans-serif;
+  --f-mono:  'JetBrains Mono', monospace;
+}
+
+/* ── RESET ───────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: var(--f-mono);
+  background: var(--bg);
+  color: var(--ink);
+  cursor: default;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── GRAIN TEXTURE ───────────────────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23g)' opacity='0.045'/%3E%3C/svg%3E");
+  animation: grain 7s steps(8) infinite;
+}
+@keyframes grain {
+  0%  { transform: translate(0,0); }
+  12% { transform: translate(-3%,-4%); }
+  25% { transform: translate(4%,2%); }
+  37% { transform: translate(-1%,4%); }
+  50% { transform: translate(3%,-2%); }
+  62% { transform: translate(-4%,1%); }
+  75% { transform: translate(2%,-3%); }
+  87% { transform: translate(-2%,4%); }
+  100%{ transform: translate(3%,-1%); }
+}
+
+/* ── TOP PROGRESS LINE ───────────────────────────────────────────── */
+.pline {
+  position: fixed;
+  top: 0; left: 0;
+  height: 1px;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green-g);
+  transition: width .7s cubic-bezier(.4,0,.2,1);
+  z-index: 200;
+}
+
+/* ── NAV BAR ─────────────────────────────────────────────────────── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 90;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2.5rem;
+  border-bottom: 1px solid var(--border);
+  background: rgba(13,13,15,.9);
+  backdrop-filter: blur(20px);
+}
+.nav-brand {
+  font-family: var(--f-head);
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+}
+.nav-brand-mark {
+  width: 20px;
+  height: 20px;
+  border: 1.5px solid var(--green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.nav-brand-mark::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: var(--green);
+  animation: blink 2.2s step-start infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+.nav-dots {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ndot {
+  width: 4px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all .25s;
+}
+.ndot.on {
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green-g);
+  transform: scale(1.4);
+}
+.nav-count {
+  font-family: var(--f-mono);
+  font-size: .65rem;
+  font-weight: 400;
+  color: var(--muted);
+  letter-spacing: .1em;
+}
+.nav-count strong { color: var(--green); font-weight: 600; }
+
+/* ── SIDE ARROWS ─────────────────────────────────────────────────── */
+.arr {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 80;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  background: transparent;
+  transition: all .2s;
+  font-family: var(--f-mono);
+  font-size: .8rem;
+  outline: none;
+}
+.arr:hover { border-color: var(--green); color: var(--green); }
+.arr[disabled] { opacity: .18; pointer-events: none; }
+.arr-l { left: 1.25rem; }
+.arr-r { right: 1.25rem; }
+
+/* ── DECK + SLIDES ───────────────────────────────────────────────── */
+.deck {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+.slide {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 72px 0 80px;
+  transform: translateX(100%);
+  opacity: 0;
+  transition: transform .72s cubic-bezier(.4,0,.2,1), opacity .45s ease;
+  will-change: transform, opacity;
+}
+.slide.active {
+  transform: translateX(0);
+  opacity: 1;
+}
+.slide.prev {
+  transform: translateX(-7%);
+  opacity: 0;
+}
+.slide-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 3.5rem 3rem;
+  position: relative;
+}
+
+/* ── GHOST SLIDE NUMBER ──────────────────────────────────────────── */
+.ghost-num {
+  position: absolute;
+  top: -1.5rem;
+  right: -1rem;
+  font-family: var(--f-head);
+  font-size: clamp(9rem, 18vw, 16rem);
+  font-weight: 800;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(16,185,129,.08);
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+}
+
+/* ── STACKED CONTENT ─────────────────────────────────────────────── */
+.slide-inner > * { position: relative; z-index: 1; }
+
+/* ── PART EYEBROW ────────────────────────────────────────────────── */
+.eyebrow {
+  font-family: var(--f-mono);
+  font-size: .6rem;
+  font-weight: 500;
+  letter-spacing: .25em;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: .9rem;
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+}
+.eyebrow::before {
+  content: '';
+  display: block;
+  width: 24px;
+  height: 1px;
+  background: var(--green);
+}
+
+/* ── SLIDE TITLE ─────────────────────────────────────────────────── */
+.stitle {
+  font-family: var(--f-head);
+  font-size: clamp(2.2rem, 4.5vw, 3.8rem);
+  font-weight: 800;
+  line-height: 1.0;
+  letter-spacing: -.025em;
+  color: var(--ink);
+  margin-bottom: 1rem;
+}
+.stitle em {
+  font-style: normal;
+  color: var(--green);
+}
+
+/* ── HERO TITLE ──────────────────────────────────────────────────── */
+.hero-title {
+  font-family: var(--f-head);
+  font-size: clamp(3.5rem, 8vw, 7rem);
+  font-weight: 800;
+  line-height: .92;
+  letter-spacing: -.04em;
+  color: var(--ink);
+  margin-bottom: 1.75rem;
+}
+.hero-title em {
+  font-style: normal;
+  display: block;
+  color: var(--green);
+  text-shadow: 0 0 60px rgba(16,185,129,.25);
+}
+
+/* ── INTRO TEXT ──────────────────────────────────────────────────── */
+.intro {
+  font-family: var(--f-mono);
+  font-size: .84rem;
+  line-height: 1.9;
+  color: var(--muted);
+  max-width: 620px;
+  margin-bottom: 2.5rem;
+}
+.intro strong { color: var(--ink); font-weight: 500; }
+
+/* ── DIVIDER ─────────────────────────────────────────────────────── */
+.rule {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 2rem 0;
+}
+
+/* ── GRID LAYOUTS ────────────────────────────────────────────────── */
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+.g3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; }
+.g4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; }
+@media (max-width: 900px) { .g2, .g3, .g4 { grid-template-columns: 1fr; } }
+@media (max-width: 1100px) { .g4 { grid-template-columns: repeat(2,1fr); } }
+
+/* ── FLAT PANEL ──────────────────────────────────────────────────── */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0;
+  padding: 1.25rem 1.5rem;
+}
+.panel-label {
+  font-family: var(--f-mono);
+  font-size: .58rem;
+  font-weight: 600;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: .9rem;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.panel-label::before {
+  content: '';
+  width: 3px;
+  height: 3px;
+  background: var(--green);
+  border-radius: 50%;
+}
+
+/* ── CODE BLOCK ──────────────────────────────────────────────────── */
+.code {
+  background: #050508;
+  border-left: 2px solid var(--green);
+  padding: 1rem 1.25rem;
+  font-family: var(--f-mono);
+  font-size: .73rem;
+  line-height: 1.8;
+  overflow-x: auto;
+  border-radius: 0;
+}
+.code .cm { color: rgba(245,244,239,.25); font-style: italic; }
+.code .kw { color: var(--green); }
+.code .fn { color: var(--ink); }
+.code .st { color: rgba(16,185,129,.65); }
+.code .nu { color: var(--green); }
+.code .va { color: var(--ink); opacity: .9; }
+
+/* ── DATA TABLE ──────────────────────────────────────────────────── */
+.tbl { width: 100%; border-collapse: collapse; }
+.tbl th {
+  font-family: var(--f-mono);
+  font-size: .56rem;
+  font-weight: 600;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: .4rem .75rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+.tbl td {
+  font-family: var(--f-mono);
+  font-size: .76rem;
+  color: var(--ink);
+  padding: .55rem .75rem;
+  border-bottom: 1px solid rgba(245,244,239,.05);
+}
+.tbl tr:last-child td { border-bottom: none; }
+.tbl tr:hover td { background: rgba(245,244,239,.02); }
+
+/* ── BADGES ──────────────────────────────────────────────────────── */
+.badge {
+  display: inline-block;
+  font-family: var(--f-mono);
+  font-size: .55rem;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: .2rem .55rem;
+  border-radius: 0;
+}
+.b-safe { background: rgba(16,185,129,.1); color: var(--green); border: 1px solid rgba(16,185,129,.2); }
+.b-over { background: rgba(239,68,68,.1);  color: var(--danger); border: 1px solid rgba(239,68,68,.2); }
+.b-ai   { background: rgba(16,185,129,.08); color: var(--green); border: 1px solid rgba(16,185,129,.18); }
+
+/* ── TECH TAGS ───────────────────────────────────────────────────── */
+.tags { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 2rem; }
+.tag {
+  font-family: var(--f-mono);
+  font-size: .62rem;
+  font-weight: 400;
+  letter-spacing: .1em;
+  padding: .28rem .75rem;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  transition: all .2s;
+}
+.tag:hover { border-color: var(--green); color: var(--green); }
+.tag-g { border-color: rgba(16,185,129,.25); color: var(--green); }
+
+/* ── METRICS ROW ─────────────────────────────────────────────────── */
+.metrics { display: grid; grid-template-columns: repeat(4,1fr); gap: 1px; margin-bottom: 2rem; background: var(--border); border: 1px solid var(--border); }
+@media (max-width: 900px) { .metrics { grid-template-columns: repeat(2,1fr); } }
+.metric {
+  padding: 1.25rem 1.5rem;
+  background: var(--bg);
+}
+.metric-l {
+  font-family: var(--f-mono);
+  font-size: .57rem;
+  font-weight: 500;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: .4rem;
+}
+.metric-v {
+  font-family: var(--f-head);
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--ink);
+  line-height: 1;
+}
+.metric-u { font-size: .8rem; font-weight: 400; color: var(--muted); }
+.metric-g .metric-v { color: var(--green); }
+
+/* ── CALLOUT BOX ─────────────────────────────────────────────────── */
+.callout {
+  border-left: 2px solid var(--green);
+  padding: 1.25rem 1.5rem;
+  background: rgba(16,185,129,.04);
+  margin: 1.75rem 0;
+}
+.callout.warn { border-left-color: var(--danger); background: rgba(239,68,68,.04); }
+.callout h4 {
+  font-family: var(--f-mono);
+  font-size: .6rem;
+  font-weight: 600;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: .65rem;
+}
+.callout.warn h4 { color: var(--danger); }
+.callout p {
+  font-family: var(--f-mono);
+  font-size: .8rem;
+  line-height: 1.85;
+  color: var(--muted);
+  margin-bottom: .4rem;
+}
+.callout p:last-child { margin-bottom: 0; }
+.callout p strong { color: var(--ink); font-weight: 500; }
+.callout code {
+  background: rgba(16,185,129,.1);
+  padding: .1rem .4rem;
+  font-size: .85em;
+  color: var(--green);
+}
+
+/* ── PIPELINE STEPS ──────────────────────────────────────────────── */
+.steps { display: flex; flex-direction: column; gap: 0; }
+.step {
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+  padding: .9rem 0;
+  border-bottom: 1px solid rgba(245,244,239,.06);
+}
+.step:last-child { border-bottom: none; }
+.step-n {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--green);
+  color: var(--green);
+  font-family: var(--f-mono);
+  font-size: .65rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: .05rem;
+}
+.step h4 {
+  font-family: var(--f-mono);
+  font-size: .76rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: .2rem;
+}
+.step p {
+  font-family: var(--f-mono);
+  font-size: .72rem;
+  color: var(--muted);
+  line-height: 1.7;
+}
+.step code {
+  font-size: .85em;
+  color: var(--green);
+  background: rgba(16,185,129,.08);
+  padding: .1rem .35rem;
+}
+
+/* ── ARCH FLOW ───────────────────────────────────────────────────── */
+.arch {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  overflow-x: auto;
+  padding: 1.25rem 0;
+}
+.arch-node {
+  flex-shrink: 0;
+  min-width: 100px;
+  text-align: center;
+  padding: .9rem .75rem;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  transition: border-color .2s;
+}
+.arch-node:hover { border-color: var(--green); }
+.arch-node-n {
+  font-family: var(--f-mono);
+  font-size: .55rem;
+  color: var(--green);
+  margin-bottom: .3rem;
+  letter-spacing: .15em;
+}
+.arch-node-l {
+  font-family: var(--f-head);
+  font-size: .78rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: .15rem;
+}
+.arch-node-s {
+  font-family: var(--f-mono);
+  font-size: .58rem;
+  color: var(--muted);
+}
+.arch-conn {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .2rem;
+  min-width: 60px;
+}
+.arch-line {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, var(--border), rgba(16,185,129,.5), var(--border));
+  position: relative;
+}
+.arch-line::after {
+  content: '▶';
+  position: absolute;
+  right: -3px;
+  top: -6px;
+  color: var(--green);
+  font-size: 7px;
+}
+.arch-proto {
+  font-family: var(--f-mono);
+  font-size: .52rem;
+  color: var(--muted);
+  text-align: center;
+  white-space: nowrap;
+  letter-spacing: .06em;
+}
+
+/* ── OLED MOCKUP ─────────────────────────────────────────────────── */
+.oled {
+  background: #000;
+  border: 1px solid #1c1c1c;
+  padding: .85rem 1rem;
+  font-family: var(--f-mono);
+  font-size: .7rem;
+  line-height: 1.75;
+}
+.oled-row { color: #555; }
+.oled-row span { color: #d0d0d0; }
+.oled-row.ok { color: #10B981; }
+.oled-row.ov {
+  background: #d0d0d0;
+  color: #000;
+  display: block;
+  padding: 0 .2rem;
+  animation: inv 1s infinite;
+}
+.oled-hd { color: #999; border-bottom: 1px solid #1c1c1c; margin-bottom: .2rem; text-align: center; }
+.oled-ts { font-size: .58rem; color: #333; }
+@keyframes inv { 50% { background: transparent; color: #d0d0d0; } }
+
+/* ── COMPONENT CARD ──────────────────────────────────────────────── */
+.comp {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  transition: border-color .2s;
+  overflow: hidden;
+}
+.comp:hover { border-color: var(--green); }
+.comp img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  display: block;
+  filter: grayscale(30%) brightness(.85) contrast(1.05);
+  transition: filter .3s;
+}
+.comp:hover img { filter: grayscale(0%) brightness(.95) contrast(1.05); }
+.comp-body { padding: .75rem 1rem; }
+.comp-id {
+  font-family: var(--f-mono);
+  font-size: .52rem;
+  color: var(--green);
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  margin-bottom: .3rem;
+}
+.comp h4 {
+  font-family: var(--f-head);
+  font-size: .8rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: .2rem;
+}
+.comp p {
+  font-family: var(--f-mono);
+  font-size: .65rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* ── PART MARKS ROW ──────────────────────────────────────────────── */
+.marks-row {
+  display: flex;
+  gap: 1px;
+  margin-bottom: 2.5rem;
+  background: var(--border);
+  border: 1px solid var(--border);
+}
+.mcard {
+  flex: 1;
+  padding: 1.25rem 1.5rem;
+  background: var(--bg);
+  position: relative;
+}
+.mcard::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+}
+.mcard-a::after { background: var(--green); }
+.mcard-b::after { background: var(--ink); opacity: .3; }
+.mcard-c::after { background: var(--green); opacity: .45; }
+.mcard-num {
+  font-family: var(--f-head);
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: .2rem;
+}
+.mcard-a .mcard-num { color: var(--green); }
+.mcard-b .mcard-num { color: var(--ink); }
+.mcard-c .mcard-num { color: rgba(16,185,129,.5); }
+.mcard-sub {
+  font-family: var(--f-mono);
+  font-size: .57rem;
+  font-weight: 500;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.mcard-title {
+  font-family: var(--f-mono);
+  font-size: .73rem;
+  color: var(--ink);
+  margin-top: .25rem;
+  opacity: .7;
+}
+.mcard-tag {
+  position: absolute;
+  top: .75rem;
+  right: .75rem;
+  font-family: var(--f-mono);
+  font-size: .52rem;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  padding: .18rem .45rem;
+  letter-spacing: .1em;
+}
+
+/* ── CHART WRAP ──────────────────────────────────────────────────── */
+.cwrap {
+  border: 1px solid var(--border);
+  padding: 1.25rem;
+  background: var(--surface);
+}
+
+/* ── ENTER ANIMATIONS ────────────────────────────────────────────── */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.rise { opacity: 0; animation: rise .55s ease forwards; }
+.r1 { animation-delay: .06s; }
+.r2 { animation-delay: .14s; }
+.r3 { animation-delay: .22s; }
+.r4 { animation-delay: .30s; }
+.r5 { animation-delay: .38s; }
+.r6 { animation-delay: .46s; }
+
+/* ── HERO WAVEFORM ───────────────────────────────────────────────── */
+.hero-wave {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 100px;
+  overflow: hidden;
+  pointer-events: none;
+}
+#wpath {
+  stroke-dasharray: 1800;
+  stroke-dashoffset: 1800;
+  animation: wdraw 2.8s ease-out forwards, wloop 5s linear 2.8s infinite;
+}
+@keyframes wdraw { to { stroke-dashoffset: 0; } }
+@keyframes wloop {
+  0%   { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -1800; }
+}
+
+/* ── SVG CHARTS ──────────────────────────────────────────────────── */
+@keyframes line-on { from { stroke-dashoffset: 600; } to { stroke-dashoffset: 0; } }
+.ln { stroke-dasharray: 600; stroke-dashoffset: 600; animation: line-on 1.8s ease-out forwards; }
+.ln2 { stroke-dasharray: 600; stroke-dashoffset: 600; animation: line-on 1.8s ease-out .4s forwards; }
+@keyframes bar-up { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+.bup { transform-origin: bottom; transform: scaleY(0); animation: bar-up .65s ease-out forwards; }
+@keyframes gauge-in { from { stroke-dashoffset: 226; } to { stroke-dashoffset: var(--ge); } }
+.garc { stroke-dasharray: 226; stroke-dashoffset: 226; animation: gauge-in 1.8s ease-out .3s forwards; }
+
+/* ── HINT TEXT ───────────────────────────────────────────────────── */
+.hint {
+  font-family: var(--f-mono);
+  font-size: .58rem;
+  color: var(--muted);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  margin-top: 1.5rem;
+  animation: flicker 2.5s ease-in-out infinite;
+}
+.hint::before { content: '→'; color: var(--green); }
+@keyframes flicker {
+  0%,100% { opacity: .5; }
+  50%      { opacity: 1; }
+}
+
+/* ── INLINE CODE ─────────────────────────────────────────────────── */
+ic {
+  font-family: var(--f-mono);
+  font-size: .85em;
+  color: var(--green);
+  background: rgba(16,185,129,.08);
+  padding: .1rem .38rem;
+}
+
+/* ── SVG text defaults ───────────────────────────────────────────── */
+svg text { font-family: 'JetBrains Mono', monospace; }
+
+/* ── LOGO ROW (text-based) ───────────────────────────────────────── */
+.stack-row {
+  display: flex;
+  align-items: stretch;
+  flex-wrap: wrap;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  margin-top: 1.5rem;
+}
+.stack-item {
+  flex: 1;
+  min-width: 120px;
+  padding: .9rem 1.25rem;
+  background: var(--bg);
+  text-align: center;
+}
+.stack-item .si-name {
+  font-family: var(--f-head);
+  font-size: .78rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: .2rem;
+}
+.stack-item .si-role {
+  font-family: var(--f-mono);
+  font-size: .58rem;
+  color: var(--muted);
+  letter-spacing: .1em;
+}
+
+</style>
+</head>
+<body>
+
+<!-- PROGRESS -->
+<div class="pline" id="pline" style="width:20%"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">
+    <div class="nav-brand-mark"></div>
+    SEM · v1.0
+  </div>
+  <div class="nav-dots" id="ndots"></div>
+  <div class="nav-count">
+    <strong id="cur">01</strong>&thinsp;/&thinsp;05
+  </div>
+</nav>
+
+<button class="arr arr-l" id="prev" onclick="go(-1)" disabled>&#8592;</button>
+<button class="arr arr-r" id="next" onclick="go(1)">&#8594;</button>
+
+<div class="deck" id="deck">
+
+
+<!-- ════════════════════════════════════════
+     01 — HERO
+════════════════════════════════════════ -->
+<div class="slide active" id="s0">
+<div class="slide-inner" style="min-height:calc(100vh - 152px);display:flex;flex-direction:column;justify-content:center;">
+  <div class="ghost-num" aria-hidden="true">01</div>
+
+  <div class="eyebrow rise r1">IoT Systems Design &nbsp;·&nbsp; Course Assignment &nbsp;·&nbsp; 100 Marks</div>
+
+  <h1 class="hero-title rise r2">
+    Smart<br>
+    <em>Energy</em>
+    Monitoring System
+  </h1>
+
+  <p class="intro rise r3">
+    A three-layer IoT pipeline — from <strong>ESP32 hardware simulation</strong> to
+    multi-cloud dashboards and <strong>AWS-hosted AI power prediction</strong>.
+    Real-time alerts. Zero cloud cost. Full-stack implementation.
+  </p>
+
+  <div class="marks-row rise r4">
+    <div class="mcard mcard-a">
+      <div class="mcard-num">40</div>
+      <div class="mcard-sub">Part A</div>
+      <div class="mcard-title">Hardware Simulation</div>
+      <div class="mcard-tag">MARKS</div>
+    </div>
+    <div class="mcard mcard-b">
+      <div class="mcard-num">30</div>
+      <div class="mcard-sub">Part B</div>
+      <div class="mcard-title">ThingSpeak Cloud</div>
+      <div class="mcard-tag">MARKS</div>
+    </div>
+    <div class="mcard mcard-c">
+      <div class="mcard-num">30</div>
+      <div class="mcard-sub">Part C</div>
+      <div class="mcard-title">AWS IoT + AI</div>
+      <div class="mcard-tag">MARKS</div>
+    </div>
+  </div>
+
+  <div class="tags rise r5">
+    <span class="tag tag-g">ESP32 WROOM-32</span>
+    <span class="tag tag-g">Arduino C++</span>
+    <span class="tag">Wokwi</span>
+    <span class="tag">ThingSpeak</span>
+    <span class="tag">MATLAB</span>
+    <span class="tag">AWS IoT Core</span>
+    <span class="tag">Lambda</span>
+    <span class="tag">DynamoDB</span>
+    <span class="tag tag-g">NumPy AI</span>
+    <span class="tag">Grafana Cloud</span>
+  </div>
+
+  <div class="hint rise r6">Press arrow or keyboard → to explore</div>
+
+  <!-- hero waveform -->
+  <div class="hero-wave">
+    <svg viewBox="0 0 1280 100" preserveAspectRatio="none" style="width:100%;height:100%;">
+      <defs>
+        <linearGradient id="wg" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#10B981" stop-opacity="0"/>
+          <stop offset="15%" stop-color="#10B981" stop-opacity=".5"/>
+          <stop offset="85%" stop-color="#10B981" stop-opacity=".5"/>
+          <stop offset="100%" stop-color="#10B981" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <path id="wpath"
+        d="M0,75 L60,75 L60,35 L100,35 L100,75 L160,75 L160,28 L200,28 L200,75 L260,75 L260,48 L290,48 L290,75 L350,75 L350,18 L400,18 L400,75 L460,75 L460,42 L490,42 L490,75 L550,75 L550,32 L590,32 L590,75 L650,75 L650,52 L680,52 L680,75 L740,75 L740,22 L780,22 L780,75 L840,75 L840,45 L870,45 L870,75 L930,75 L930,36 L970,36 L970,75 L1030,75 L1030,58 L1060,58 L1060,75 L1120,75 L1120,29 L1160,29 L1160,75 L1220,75 L1220,40 L1260,40 L1260,75 L1280,75"
+        fill="none" stroke="url(#wg)" stroke-width="1.5"/>
+      <path
+        d="M0,75 L60,75 L60,35 L100,35 L100,75 L160,75 L160,28 L200,28 L200,75 L260,75 L260,48 L290,48 L290,75 L350,75 L350,18 L400,18 L400,75 L460,75 L460,42 L490,42 L490,75 L550,75 L550,32 L590,32 L590,75 L650,75 L650,52 L680,52 L680,75 L740,75 L740,22 L780,22 L780,75 L840,75 L840,45 L870,45 L870,75 L930,75 L930,36 L970,36 L970,75 L1030,75 L1030,58 L1060,58 L1060,75 L1120,75 L1120,29 L1160,29 L1160,75 L1220,75 L1220,40 L1260,40 L1260,75 L1280,75"
+        fill="none" stroke="#10B981" stroke-width="5" stroke-opacity=".06"/>
+    </svg>
+  </div>
+</div>
+</div><!-- /s0 -->
+
+
+<!-- ════════════════════════════════════════
+     02 — PART A: HARDWARE
+════════════════════════════════════════ -->
+<div class="slide" id="s1">
+<div class="slide-inner">
+  <div class="ghost-num" aria-hidden="true">02</div>
+
+  <div class="eyebrow rise r1">Part A &nbsp;·&nbsp; Hardware Simulation &nbsp;·&nbsp; 40 Marks</div>
+  <h2 class="stitle rise r2">Circuit Design &amp; <em>Sensor Reading</em></h2>
+  <p class="intro rise r3">
+    The <strong>ESP32 WROOM-32</strong> reads voltage and current from two ADC1 pins at 2 Hz, computes
+    power (P = V × I), and triggers local hardware alerts when consumption exceeds 150 W.
+    Fully simulated in Wokwi — zero physical components required.
+  </p>
+
+  <!-- Components -->
+  <div class="g4 rise r3" style="margin-bottom:1.5rem;">
+    <div class="comp">
+      <img src="assets/esp32.jpg" alt="ESP32 WROOM-32"/>
+      <div class="comp-body">
+        <div class="comp-id">U1</div>
+        <h4>ESP32 WROOM-32</h4>
+        <p>Dual-core 240 MHz MCU. 34 GPIO pins. Built-in WiFi + BT. 12-bit ADC.</p>
+      </div>
+    </div>
+    <div class="comp">
+      <img src="assets/oled.jpg" alt="SSD1306 OLED"/>
+      <div class="comp-body">
+        <div class="comp-id">DISP</div>
+        <h4>SSD1306 OLED</h4>
+        <p>128×64 monochrome I²C display. Address 0x3C. GPIO21/22.</p>
+      </div>
+    </div>
+    <div class="comp">
+      <img src="assets/potentiometer.jpg" alt="Potentiometer"/>
+      <div class="comp-body">
+        <div class="comp-id">S1/S2</div>
+        <h4>Potentiometers ×2</h4>
+        <p>GPIO34 — voltage. GPIO35 — current. ADC1 — WiFi-safe.</p>
+      </div>
+    </div>
+    <div class="comp">
+      <img src="assets/ACS712.jpg" alt="ACS712"/>
+      <div class="comp-body">
+        <div class="comp-id">ACS</div>
+        <h4>ACS712 Sensor</h4>
+        <p>Hall-effect current sensor. Simulated via ADC pot in Wokwi.</p>
+      </div>
+    </div>
+    <div class="comp">
+      <img src="assets/led_green.jpg" alt="Green LED"/>
+      <div class="comp-body">
+        <div class="comp-id">LED1</div>
+        <h4>Green LED</h4>
+        <p>SAFE indicator. GPIO25. Digital output, active HIGH.</p>
+      </div>
+    </div>
+    <div class="comp">
+      <img src="assets/led_red.jpg" alt="Red LED"/>
+      <div class="comp-body">
+        <div class="comp-id">LED2</div>
+        <h4>Red LED</h4>
+        <p>OVERLOAD indicator. GPIO26. Lights when P &gt; 150 W.</p>
+      </div>
+    </div>
+    <div class="comp">
+      <img src="assets/buzzer.jpg" alt="Buzzer"/>
+      <div class="comp-body">
+        <div class="comp-id">BZ1</div>
+        <h4>Buzzer</h4>
+        <p>Audible alarm at 1 kHz. GPIO27. PWM-capable pin.</p>
+      </div>
+    </div>
+    <div class="comp">
+      <img src="assets/breadboard.jpg" alt="Breadboard"/>
+      <div class="comp-body">
+        <div class="comp-id">BB1</div>
+        <h4>Breadboard</h4>
+        <p>Full-size 830-tie prototyping platform for all connections.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="g2 rise r4">
+    <div style="display:flex;flex-direction:column;gap:1.25rem;">
+      <!-- GPIO table -->
+      <div class="panel">
+        <div class="panel-label">GPIO Pin Assignments</div>
+        <table class="tbl">
+          <thead><tr><th>Pin</th><th>Function</th><th>Reason</th></tr></thead>
+          <tbody>
+            <tr><td style="color:var(--green)">GPIO34</td><td>Voltage ADC in</td><td style="color:var(--muted)">ADC1 — WiFi safe</td></tr>
+            <tr><td style="color:var(--green)">GPIO35</td><td>Current ADC in</td><td style="color:var(--muted)">ADC1, input-only pin</td></tr>
+            <tr><td style="color:var(--ink)">GPIO21</td><td>OLED SDA</td><td style="color:var(--muted)">Hardware I²C bus</td></tr>
+            <tr><td style="color:var(--ink)">GPIO22</td><td>OLED SCL</td><td style="color:var(--muted)">Hardware I²C bus</td></tr>
+            <tr><td style="color:var(--ink)">GPIO25</td><td>Green LED</td><td style="color:var(--muted)">Digital output</td></tr>
+            <tr><td style="color:var(--ink)">GPIO26</td><td>Red LED</td><td style="color:var(--muted)">Digital output</td></tr>
+            <tr><td style="color:var(--ink)">GPIO27</td><td>Buzzer</td><td style="color:var(--muted)">PWM capable</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Power formula -->
+      <div class="panel">
+        <div class="panel-label">Power Calculation</div>
+        <div class="code">
+<span class="cm">// 12-bit ADC: 0–4095 maps to physical range</span>
+<span class="kw">float</span> <span class="va">V</span> = (raw34 / <span class="nu">4095.0f</span>) * <span class="nu">240.0f</span>;  <span class="cm">// Volts</span>
+<span class="kw">float</span> <span class="va">I</span> = (raw35 / <span class="nu">4095.0f</span>) * <span class="nu">10.0f</span>;   <span class="cm">// Amps</span>
+<span class="kw">float</span> <span class="va">P</span> = <span class="va">V</span> * <span class="va">I</span>;                         <span class="cm">// Watts</span>
+<span class="kw">int</span>   <span class="va">alert</span> = (<span class="va">P</span> > <span class="nu">150.0f</span>) ? <span class="nu">1</span> : <span class="nu">0</span>;    <span class="cm">// Overload</span></div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:1.25rem;">
+      <!-- OLED mockup -->
+      <div class="panel">
+        <div class="panel-label">SSD1306 OLED Output</div>
+        <div class="oled">
+          <div class="oled-row oled-hd">SMART ENERGY MON.</div>
+          <div class="oled-row">V: <span>220.50 V</span></div>
+          <div class="oled-row">I: <span>&nbsp;0.68 A</span></div>
+          <div class="oled-row">P: <span>149.94 W</span></div>
+          <div class="oled-row ok">Status: SAFE ✓</div>
+          <div class="oled-row oled-ts">2026-04-17 14:32:00Z</div>
+        </div>
+        <p style="font-size:.67rem;color:var(--muted);margin-top:.6rem;line-height:1.6;">When <ic>P &gt; 150 W</ic>: status row inverts to white-on-black text (hardware blink), red LED + buzzer activate. Part C adds <span style="color:var(--green)">AI: 153.2W</span> on line 6.</p>
+      </div>
+
+      <!-- Live chart -->
+      <div class="cwrap">
+        <div class="panel-label" style="margin-bottom:.6rem;">Live Power Reading — Simulated</div>
+        <svg viewBox="0 0 360 130" style="width:100%;height:auto;">
+          <line x1="35" y1="10" x2="350" y2="10" stroke="rgba(245,244,239,.08)" stroke-width="1"/>
+          <line x1="35" y1="44" x2="350" y2="44" stroke="rgba(245,244,239,.08)" stroke-width="1"/>
+          <line x1="35" y1="78" x2="350" y2="78" stroke="rgba(245,244,239,.08)" stroke-width="1"/>
+          <line x1="35" y1="112" x2="350" y2="112" stroke="rgba(245,244,239,.08)" stroke-width="1"/>
+          <text x="30" y="14" text-anchor="end" font-size="8" fill="rgba(245,244,239,.3)">200W</text>
+          <text x="30" y="48" text-anchor="end" font-size="8" fill="#ef4444">150W</text>
+          <text x="30" y="82" text-anchor="end" font-size="8" fill="rgba(245,244,239,.3)">100W</text>
+          <text x="30" y="116" text-anchor="end" font-size="8" fill="rgba(245,244,239,.3)">0W</text>
+          <line x1="35" y1="44" x2="350" y2="44" stroke="#ef4444" stroke-width="1" stroke-dasharray="4,3" opacity=".45"/>
+          <defs>
+            <linearGradient id="pg" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#10B981" stop-opacity=".2"/>
+              <stop offset="100%" stop-color="#10B981" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path d="M35,105 L75,92 L110,78 L145,60 L175,44 L205,28 L225,22 L255,38 L285,58 L315,74 L345,86 L350,90 L350,112 L35,112 Z" fill="url(#pg)"/>
+          <path class="ln" d="M35,105 L75,92 L110,78 L145,60 L175,44 L205,28 L225,22 L255,38 L285,58 L315,74 L345,86" fill="none" stroke="#10B981" stroke-width="1.8" stroke-linecap="round"/>
+          <circle cx="225" cy="22" r="3.5" fill="#ef4444"/>
+          <text x="230" y="18" font-size="8" fill="#ef4444">OVERLOAD</text>
+        </svg>
+        <p style="font-size:.68rem;color:var(--muted);line-height:1.65;margin-top:.5rem;">Turning both potentiometers to max crosses the 150W threshold. Red LED, buzzer, and inverted OLED text all activate within 500ms — hardware response, no cloud dependency.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout rise r5">
+    <h4>Critical Design Decision — Why ADC1 Pins?</h4>
+    <p>The ESP32 has two ADC modules. <strong>ADC2 is completely disabled when the WiFi radio is active</strong> — a documented Espressif hardware limitation. Any sketch using ADC2 pins (GPIO0, 2, 4, 12–15, 25–27) for sensing will produce garbage readings the moment WiFi connects. GPIO34 and GPIO35 are <strong>ADC1-only pins</strong> that remain fully functional with WiFi running. This decision is foundational: Parts B and C both require WiFi, making the ADC1 pin choice mandatory for the entire system to function correctly.</p>
+  </div>
+</div>
+</div><!-- /s1 -->
+
+
+<!-- ════════════════════════════════════════
+     03 — PART B: THINGSPEAK + MATLAB
+════════════════════════════════════════ -->
+<div class="slide" id="s2">
+<div class="slide-inner">
+  <div class="ghost-num" aria-hidden="true">03</div>
+
+  <div class="eyebrow rise r1">Part B &nbsp;·&nbsp; ThingSpeak Cloud Dashboard &nbsp;·&nbsp; 30 Marks</div>
+  <h2 class="stitle rise r2">Cloud Upload &amp; <em>MATLAB Analysis</em></h2>
+  <p class="intro rise r3">
+    The ESP32 gains WiFi and uploads four sensor values to <strong>ThingSpeak every 15 seconds</strong>.
+    MATLAB running in MathWorks cloud smooths noisy data with a 10-sample moving average.
+    A no-code React alert emails the operator the instant an overload is recorded.
+  </p>
+
+  <div class="metrics rise r3">
+    <div class="metric">
+      <div class="metric-l">Upload interval</div>
+      <div class="metric-v">15<span class="metric-u">s</span></div>
+    </div>
+    <div class="metric">
+      <div class="metric-l">Channel fields</div>
+      <div class="metric-v">4</div>
+    </div>
+    <div class="metric">
+      <div class="metric-l">MA window</div>
+      <div class="metric-v">10<span class="metric-u"> pts</span></div>
+    </div>
+    <div class="metric">
+      <div class="metric-l">Alert method</div>
+      <div class="metric-v" style="font-size:1.5rem;">Email</div>
+    </div>
+  </div>
+
+  <div class="g2 rise r4">
+    <div style="display:flex;flex-direction:column;gap:1.25rem;">
+      <!-- Field mapping -->
+      <div class="panel">
+        <div class="panel-label">ThingSpeak Channel Field Mapping</div>
+        <table class="tbl">
+          <thead><tr><th>Field</th><th>Variable</th><th>Unit</th><th>Range</th></tr></thead>
+          <tbody>
+            <tr><td style="color:var(--green)">field1</td><td>Voltage</td><td>V</td><td>0–240</td></tr>
+            <tr><td style="color:var(--green)">field2</td><td>Current</td><td>A</td><td>0–10</td></tr>
+            <tr><td style="color:var(--green)">field3</td><td>Power</td><td>W</td><td>0–2400</td></tr>
+            <tr><td style="color:var(--danger)">field4</td><td>Alert flag</td><td>—</td><td>0 or 1</td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:.69rem;color:var(--muted);line-height:1.65;margin-top:.75rem;"><ic>field4 = 1</ic> is the trigger for the ThingSpeak React email alert. It transitions to 1 the instant power exceeds 150W and back to 0 when the load drops below the threshold.</p>
+      </div>
+
+      <!-- Arduino code -->
+      <div class="panel">
+        <div class="panel-label">Arduino HTTP Upload — Non-Blocking</div>
+        <div class="code">
+<span class="cm">// millis() timer — never blocks sensor loop</span>
+<span class="kw">if</span> (<span class="fn">millis</span>() - lastUp >= <span class="nu">15000UL</span>) {
+  String url = BASE_URL
+    + <span class="st">"?api_key="</span> + API_KEY
+    + <span class="st">"&field1="</span> + <span class="fn">String</span>(V, <span class="nu">2</span>)
+    + <span class="st">"&field2="</span> + <span class="fn">String</span>(I, <span class="nu">2</span>)
+    + <span class="st">"&field3="</span> + <span class="fn">String</span>(P, <span class="nu">2</span>)
+    + <span class="st">"&field4="</span> + alert;
+  http.<span class="fn">GET</span>(url);
+  lastUp = <span class="fn">millis</span>();
+}</div>
+        <p style="font-size:.69rem;color:var(--muted);line-height:1.65;margin-top:.75rem;">Using <ic>millis()</ic> instead of <ic>delay(15000)</ic> means the sensor loop and OLED refresh keep running at 500ms while waiting for the upload interval. The device never freezes.</p>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:1.25rem;">
+      <!-- MA chart -->
+      <div class="cwrap">
+        <div class="panel-label" style="margin-bottom:.6rem;">MATLAB movmean — Noise Smoothing</div>
+        <svg viewBox="0 0 350 140" style="width:100%;height:auto;">
+          <line x1="30" y1="15" x2="340" y2="15" stroke="rgba(245,244,239,.07)" stroke-width="1"/>
+          <line x1="30" y1="50" x2="340" y2="50" stroke="rgba(245,244,239,.07)" stroke-width="1"/>
+          <line x1="30" y1="85" x2="340" y2="85" stroke="rgba(245,244,239,.07)" stroke-width="1"/>
+          <line x1="30" y1="120" x2="340" y2="120" stroke="rgba(245,244,239,.07)" stroke-width="1"/>
+          <!-- raw noisy signal -->
+          <path class="ln" d="M30,100 L60,72 L90,108 L120,60 L150,90 L180,45 L210,70 L240,35 L270,62 L300,85 L330,52"
+            fill="none" stroke="rgba(16,185,129,.3)" stroke-width="1.2" stroke-linecap="round"/>
+          <!-- smoothed signal -->
+          <path class="ln2" d="M30,100 L60,88 L90,87 L120,80 L150,76 L180,70 L210,65 L240,57 L270,56 L300,62 L330,62"
+            fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round"/>
+          <!-- legend -->
+          <line x1="195" y1="14" x2="212" y2="14" stroke="rgba(16,185,129,.3)" stroke-width="1.2"/>
+          <text x="215" y="18" font-size="8" fill="rgba(245,244,239,.35)">Raw ADC</text>
+          <line x1="195" y1="26" x2="212" y2="26" stroke="#10B981" stroke-width="2"/>
+          <text x="215" y="30" font-size="8" fill="rgba(245,244,239,.35)">movmean(10)</text>
+        </svg>
+        <p style="font-size:.69rem;color:var(--muted);line-height:1.65;margin-top:.5rem;">Faint line = raw ADC signal with electrical noise spikes. Solid line = 10-sample moving average. The trend becomes clearly visible and overload detection becomes reliable after smoothing.</p>
+      </div>
+
+      <!-- MATLAB code -->
+      <div class="panel">
+        <div class="panel-label">MATLAB Analysis Script</div>
+        <div class="code">
+<span class="cm">% Fetch last 200 power readings from field 3</span>
+data = <span class="fn">thingSpeakRead</span>(channelID,
+       <span class="st">'Fields'</span>, <span class="nu">3</span>, <span class="st">'NumPoints'</span>, <span class="nu">200</span>);
+
+<span class="cm">% 'shrink' avoids padding zeros at edges</span>
+smoothed = <span class="fn">movmean</span>(data, <span class="nu">10</span>,
+           <span class="st">'Endpoints'</span>, <span class="st">'shrink'</span>);
+
+overloads = <span class="fn">find</span>(data > <span class="nu">150</span>);
+<span class="fn">fprintf</span>(<span class="st">'%d overload events\n'</span>, <span class="fn">numel</span>(overloads));</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout rise r5">
+    <h4>What Part B Adds Over Part A</h4>
+    <p>Part A monitors locally — if no one is in the room, nobody knows about an overload. Part B fixes this. <strong>ThingSpeak stores every reading as a timestamped data point</strong> accessible from any browser, anywhere in the world. The MATLAB script runs on MathWorks' cloud infrastructure without any server setup. The React alert is entirely no-code: set <ic>field4 = 1</ic> as the condition, enter an email address, click save. The 15-second interval is the ThingSpeak free-tier minimum — it cannot be lower without a paid plan.</p>
+  </div>
+
+  <div class="stack-row rise r6">
+    <div class="stack-item">
+      <img src="assets/esp32.jpg" alt="ESP32" style="width:40px;height:40px;object-fit:cover;display:block;margin:0 auto .5rem;filter:grayscale(20%) brightness(.85);"/>
+      <div class="si-name">ESP32</div><div class="si-role">Arduino C++ sensor loop</div>
+    </div>
+    <div class="stack-item">
+      <img src="assets/wokwi_logo.png" alt="Wokwi" style="width:40px;height:40px;object-fit:contain;display:block;margin:0 auto .5rem;filter:brightness(.85);"/>
+      <div class="si-name">Wokwi</div><div class="si-role">Browser simulation</div>
+    </div>
+    <div class="stack-item">
+      <img src="assets/thingspeak_logo.jpg" alt="ThingSpeak" style="width:40px;height:40px;object-fit:contain;display:block;margin:0 auto .5rem;filter:grayscale(20%) brightness(.85);"/>
+      <div class="si-name">ThingSpeak</div><div class="si-role">IoT time-series cloud</div>
+    </div>
+    <div class="stack-item">
+      <img src="assets/espressif_logo.jpg" alt="Espressif" style="width:40px;height:40px;object-fit:contain;display:block;margin:0 auto .5rem;filter:grayscale(20%) brightness(.85);"/>
+      <div class="si-name">Espressif</div><div class="si-role">ESP32 chipmaker</div>
+    </div>
+    <div class="stack-item">
+      <div style="width:40px;height:40px;border:1px solid var(--green);display:flex;align-items:center;justify-content:center;margin:0 auto .5rem;font-family:var(--f-mono);font-size:.55rem;color:var(--green);letter-spacing:.05em;">REACT</div>
+      <div class="si-name">React Alert</div><div class="si-role">No-code email trigger</div>
+    </div>
+  </div>
+</div>
+</div><!-- /s2 -->
+
+
+<!-- ════════════════════════════════════════
+     04 — PART C: AWS IOT + AI
+════════════════════════════════════════ -->
+<div class="slide" id="s3">
+<div class="slide-inner">
+  <div class="ghost-num" aria-hidden="true">04</div>
+
+  <div class="eyebrow rise r1">Part C &nbsp;·&nbsp; AWS IoT Core + AI Prediction &nbsp;·&nbsp; 30 Marks</div>
+  <h2 class="stitle rise r2">Secured Pipeline &amp; <em>NumPy AI</em></h2>
+  <p class="intro rise r3">
+    MQTT over TLS replaces HTTP. An <strong>AWS Lambda function</strong> processes every reading:
+    saves to DynamoDB, fetches live weather, runs linear regression on the last 10 readings,
+    and <strong>publishes the prediction back to the ESP32's OLED</strong> — in under 4 seconds.
+  </p>
+
+  <!-- Architecture flow -->
+  <div class="cwrap rise r3" style="margin-bottom:1.5rem;overflow-x:auto;">
+    <div class="panel-label" style="margin-bottom:.75rem;">End-to-End Data Pipeline</div>
+    <div class="arch">
+      <div class="arch-node">
+        <img src="assets/esp32.jpg" alt="ESP32" style="width:40px;height:40px;object-fit:cover;display:block;margin:0 auto .5rem;filter:grayscale(20%) brightness(.8);"/>
+        <div class="arch-node-n">① DEVICE</div>
+        <div class="arch-node-l">ESP32</div>
+        <div class="arch-node-s">sketch_aws.ino</div>
+      </div>
+      <div class="arch-conn">
+        <div class="arch-line"></div>
+        <div class="arch-proto">MQTT/TLS<br>port 8883</div>
+      </div>
+      <div class="arch-node">
+        <img src="assets/aws_logo.jpg" alt="AWS IoT Core" style="width:40px;height:40px;object-fit:contain;display:block;margin:0 auto .5rem;filter:grayscale(20%) brightness(.8);"/>
+        <div class="arch-node-n">② BROKER</div>
+        <div class="arch-node-l">IoT Core</div>
+        <div class="arch-node-s">energy/monitor</div>
+      </div>
+      <div class="arch-conn">
+        <div class="arch-line"></div>
+        <div class="arch-proto">IoT Rule<br>SQL trigger</div>
+      </div>
+      <div class="arch-node">
+        <img src="assets/aws_logo.jpg" alt="AWS Lambda" style="width:40px;height:40px;object-fit:contain;display:block;margin:0 auto .5rem;filter:grayscale(20%) brightness(.8);"/>
+        <div class="arch-node-n">③ COMPUTE</div>
+        <div class="arch-node-l">Lambda</div>
+        <div class="arch-node-s">Python 3.11 + NumPy</div>
+      </div>
+      <div class="arch-conn">
+        <div class="arch-line"></div>
+        <div class="arch-proto">PutItem<br>Query(10)</div>
+      </div>
+      <div class="arch-node">
+        <img src="assets/aws_logo.jpg" alt="DynamoDB" style="width:40px;height:40px;object-fit:contain;display:block;margin:0 auto .5rem;filter:grayscale(20%) brightness(.8);"/>
+        <div class="arch-node-n">④ STORE</div>
+        <div class="arch-node-l">DynamoDB</div>
+        <div class="arch-node-s">EnergyReadings</div>
+      </div>
+      <div class="arch-conn">
+        <div class="arch-line"></div>
+        <div class="arch-proto">HTTP GET<br>Function URL</div>
+      </div>
+      <div class="arch-node">
+        <img src="assets/grafana_logo.jpg" alt="Grafana" style="width:40px;height:40px;object-fit:contain;display:block;margin:0 auto .5rem;filter:grayscale(20%) brightness(.8);"/>
+        <div class="arch-node-n">⑤ VISUAL</div>
+        <div class="arch-node-l">Grafana</div>
+        <div class="arch-node-s">Infinity plugin</div>
+      </div>
+    </div>
+    <p style="font-size:.68rem;color:var(--muted);line-height:1.65;margin-top:.5rem;">The <strong style="color:var(--ink)">reverse path</strong>: after Lambda computes the prediction, it publishes to <ic>energy/predictions</ic>. The ESP32 subscribes to this topic and displays the prediction on OLED line 6 — a complete bidirectional loop with &lt;4s latency.</p>
+  </div>
+
+  <div class="g2 rise r4">
+    <!-- Lambda pipeline -->
+    <div>
+      <div class="panel-label" style="margin-bottom:.75rem;">Lambda AI Pipeline — 6 Steps</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-n">1</div>
+          <div>
+            <h4>Parse MQTT Event</h4>
+            <p>Lambda receives the ESP32 JSON as the event object: <code>deviceId, voltage, current, power, alert, timestamp</code>. No parsing needed — IoT Core rule passes JSON directly.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-n">2</div>
+          <div>
+            <h4>Write to DynamoDB</h4>
+            <p><code>PutItem</code> saves the reading. Composite key: <code>deviceId</code> (partition) + ISO timestamp (sort) ensures chronological ordering for efficient range queries.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-n">3</div>
+          <div>
+            <h4>Query Last 10 Readings</h4>
+            <p><code>ScanIndexForward=False, Limit=10</code> returns the 10 most recent readings. One efficient key-based read — no full table scan, cost is proportional to items read.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-n">4</div>
+          <div>
+            <h4>Fetch Open-Meteo Temperature</h4>
+            <p>Free weather API. Kampala coordinates: 0.3163°N, 32.5822°E. No API key required. Falls back to 25°C if the request fails.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-n">5</div>
+          <div>
+            <h4>NumPy Linear Regression</h4>
+            <p><code>np.polyfit(x, y, 1)</code> fits a line through 10 readings. Extrapolate one step forward = predicted next power. Temperature correction: +0.5%/°C above 25°C. Peak hours: ×0.85.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-n">6</div>
+          <div>
+            <h4>Publish &amp; Update</h4>
+            <p>Update DynamoDB with <code>predicted_power</code> + <code>temperature</code>. Publish prediction JSON to <code>energy/predictions</code>. ESP32 shows <span style="color:var(--green)">AI: 153.2W</span> on OLED.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div style="display:flex;flex-direction:column;gap:1.25rem;">
+      <!-- Regression chart -->
+      <div class="cwrap">
+        <div class="panel-label" style="margin-bottom:.5rem;">NumPy Regression — How It Works</div>
+        <svg viewBox="0 0 340 160" style="width:100%;height:auto;">
+          <line x1="30" y1="20" x2="320" y2="20" stroke="rgba(245,244,239,.07)" stroke-width="1"/>
+          <line x1="30" y1="55" x2="320" y2="55" stroke="rgba(245,244,239,.07)" stroke-width="1"/>
+          <line x1="30" y1="90" x2="320" y2="90" stroke="rgba(245,244,239,.07)" stroke-width="1"/>
+          <line x1="30" y1="125" x2="320" y2="125" stroke="rgba(245,244,239,.07)" stroke-width="1"/>
+          <circle cx="45"  cy="118" r="3" fill="#10B981" opacity=".8"/>
+          <circle cx="78"  cy="108" r="3" fill="#10B981" opacity=".8"/>
+          <circle cx="111" cy="95"  r="3" fill="#10B981" opacity=".8"/>
+          <circle cx="144" cy="84"  r="3" fill="#10B981" opacity=".8"/>
+          <circle cx="177" cy="74"  r="3" fill="#10B981" opacity=".8"/>
+          <circle cx="210" cy="64"  r="3" fill="#10B981" opacity=".8"/>
+          <circle cx="243" cy="55"  r="3" fill="#10B981" opacity=".8"/>
+          <circle cx="276" cy="46"  r="3" fill="#10B981" opacity=".8"/>
+          <line class="ln" x1="40" y1="121" x2="310" y2="40" stroke="rgba(16,185,129,.5)" stroke-width="1.5" stroke-dasharray="5,3"/>
+          <!-- prediction -->
+          <circle cx="306" cy="41" r="5" fill="none" stroke="#10B981" stroke-width="1.5"/>
+          <circle cx="306" cy="41" r="2.5" fill="#10B981"/>
+          <text x="312" y="38" font-size="9" fill="#10B981" font-weight="600">153.2W</text>
+          <text x="312" y="49" font-size="8" fill="rgba(245,244,239,.35)">predicted</text>
+          <text x="28" y="24"  text-anchor="end" font-size="8" fill="rgba(245,244,239,.3)">200W</text>
+          <text x="28" y="59"  text-anchor="end" font-size="8" fill="rgba(245,244,239,.3)">150W</text>
+          <text x="28" y="94"  text-anchor="end" font-size="8" fill="rgba(245,244,239,.3)">100W</text>
+          <text x="28" y="129" text-anchor="end" font-size="8" fill="rgba(245,244,239,.3)">50W</text>
+          <circle cx="145" cy="14" r="3" fill="#10B981" opacity=".8"/>
+          <text x="151" y="18" font-size="8" fill="rgba(245,244,239,.3)">Actual (10 pts)</text>
+          <line x1="215" y1="14" x2="230" y2="14" stroke="rgba(16,185,129,.5)" stroke-width="1.5" stroke-dasharray="4,2"/>
+          <text x="234" y="18" font-size="8" fill="rgba(245,244,239,.3)">np.polyfit</text>
+        </svg>
+        <p style="font-size:.68rem;color:var(--muted);line-height:1.65;margin-top:.5rem;">10 actual readings (dots). Dashed line = least-squares best fit by <ic>np.polyfit(x, y, 1)</ic>. One step beyond the last reading = the predicted value. Temperature and peak-hour multipliers are applied after regression.</p>
+      </div>
+
+      <!-- Gauge -->
+      <div class="cwrap">
+        <div class="panel-label" style="margin-bottom:.4rem;">Power Load Gauge — Live</div>
+        <svg viewBox="0 0 320 130" style="width:100%;height:auto;">
+          <path d="M70 115 A 75 75 0 0 1 250 115" fill="none" stroke="rgba(245,244,239,.07)" stroke-width="14" stroke-linecap="round"/>
+          <path d="M70 115 A 75 75 0 0 1 176 45" fill="none" stroke="rgba(16,185,129,.15)" stroke-width="14" stroke-linecap="round"/>
+          <path d="M176 45 A 75 75 0 0 1 216 58" fill="none" stroke="rgba(16,185,129,.15)" stroke-width="14" stroke-linecap="round"/>
+          <path d="M216 58 A 75 75 0 0 1 250 115" fill="none" stroke="rgba(239,68,68,.15)" stroke-width="14" stroke-linecap="round"/>
+          <path d="M70 115 A 75 75 0 0 1 211 57" fill="none" stroke="#10B981" stroke-width="14" stroke-linecap="round" class="garc" style="--ge:58;"/>
+          <text x="160" y="103" text-anchor="middle" font-size="28" font-weight="800" fill="#F5F4EF" font-family="'Syne',sans-serif">149</text>
+          <text x="160" y="118" text-anchor="middle" font-size="10" fill="rgba(245,244,239,.35)" font-family="'JetBrains Mono',monospace">Watts</text>
+          <text x="63"  y="132" text-anchor="middle" font-size="8" fill="rgba(245,244,239,.25)">0</text>
+          <text x="160" y="28"  text-anchor="middle" font-size="8" fill="rgba(245,244,239,.25)">120W</text>
+          <text x="257" y="132" text-anchor="middle" font-size="8" fill="rgba(245,244,239,.25)">240</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout rise r5">
+    <h4>Why MQTT + TLS Instead of HTTP?</h4>
+    <p>HTTP is one-way: the device asks, the cloud answers, the connection closes. <strong>MQTT is persistent and bidirectional</strong> — the device stays connected and receives predictions pushed from Lambda without ever asking for them. TLS on port 8883 with X.509 mutual certificates means both sides cryptographically prove their identity. The IoT policy grants exactly <strong>4 permissions and nothing else</strong>: Connect, Publish to <ic>energy/monitor</ic>, Subscribe to <ic>energy/predictions</ic>, Receive from <ic>energy/predictions</ic>. A compromised device cannot read other devices' data, inject fake readings, or publish to any other topic.</p>
+  </div>
+</div>
+</div><!-- /s3 -->
+
+
+<!-- ════════════════════════════════════════
+     05 — RESULTS
+════════════════════════════════════════ -->
+<div class="slide" id="s4">
+<div class="slide-inner">
+  <div class="ghost-num" aria-hidden="true">05</div>
+
+  <div class="eyebrow rise r1">Results &nbsp;·&nbsp; Performance &amp; Real-World Context</div>
+  <h2 class="stitle rise r2">System <em>Performance</em> &amp; Impact</h2>
+  <p class="intro rise r3">
+    End-to-end verified: sensor reading to AI prediction and back in <strong>under 4 seconds</strong>.
+    Running cost: <strong>$0/month</strong>. Built for Uganda's energy grid — where overload
+    protection matters.
+  </p>
+
+  <div class="metrics rise r3">
+    <div class="metric">
+      <div class="metric-l">Sensor → Cloud</div>
+      <div class="metric-v">&lt;2<span class="metric-u">s</span></div>
+    </div>
+    <div class="metric">
+      <div class="metric-l">Lambda latency</div>
+      <div class="metric-v">~1.8<span class="metric-u">s</span></div>
+    </div>
+    <div class="metric metric-g">
+      <div class="metric-l">Monthly cost</div>
+      <div class="metric-v">$0</div>
+    </div>
+    <div class="metric">
+      <div class="metric-l">Write rate</div>
+      <div class="metric-v">4<span class="metric-u">/min</span></div>
+    </div>
+  </div>
+
+  <div class="g2 rise r4">
+    <!-- Free tier bar chart -->
+    <div class="cwrap">
+      <div class="panel-label" style="margin-bottom:.75rem;">AWS Free Tier Usage (Monthly)</div>
+      <svg viewBox="0 0 320 175" style="width:100%;height:auto;">
+        <line x1="40" y1="15" x2="300" y2="15" stroke="rgba(245,244,239,.07)" stroke-width="1"/>
+        <line x1="40" y1="50" x2="300" y2="50" stroke="rgba(245,244,239,.07)" stroke-width="1"/>
+        <line x1="40" y1="85" x2="300" y2="85" stroke="rgba(245,244,239,.07)" stroke-width="1"/>
+        <line x1="40" y1="120" x2="300" y2="120" stroke="rgba(245,244,239,.07)" stroke-width="1"/>
+        <text x="36" y="19"  text-anchor="end" font-size="8" fill="rgba(245,244,239,.25)">100%</text>
+        <text x="36" y="54"  text-anchor="end" font-size="8" fill="rgba(245,244,239,.25)">75%</text>
+        <text x="36" y="89"  text-anchor="end" font-size="8" fill="rgba(245,244,239,.25)">50%</text>
+        <text x="36" y="124" text-anchor="end" font-size="8" fill="rgba(245,244,239,.25)">25%</text>
+        <!-- IoT Core 68% -->
+        <rect x="55"  y="47"  width="45" height="73" fill="#10B981" class="bup" style="animation-delay:.1s;"/>
+        <text x="77"  y="155" text-anchor="middle" font-size="7" fill="rgba(245,244,239,.4)">IoT Core</text>
+        <text x="77"  y="43"  text-anchor="middle" font-size="8" fill="#10B981" font-weight="600">68%</text>
+        <!-- Lambda 17% -->
+        <rect x="120" y="100" width="45" height="20" fill="#10B981" class="bup" style="animation-delay:.25s;"/>
+        <text x="142" y="155" text-anchor="middle" font-size="7" fill="rgba(245,244,239,.4)">Lambda</text>
+        <text x="142" y="96"  text-anchor="middle" font-size="8" fill="#10B981" font-weight="600">17%</text>
+        <!-- DynamoDB <1% -->
+        <rect x="185" y="118" width="45" height="2" fill="#10B981" class="bup" style="animation-delay:.4s;"/>
+        <text x="207" y="155" text-anchor="middle" font-size="7" fill="rgba(245,244,239,.4)">DynamoDB</text>
+        <text x="207" y="114" text-anchor="middle" font-size="8" fill="#10B981" font-weight="600">&lt;1%</text>
+        <!-- Open-Meteo free -->
+        <rect x="250" y="108" width="45" height="12" fill="rgba(245,244,239,.35)" class="bup" style="animation-delay:.55s;"/>
+        <text x="272" y="155" text-anchor="middle" font-size="7" fill="rgba(245,244,239,.4)">Open-Meteo</text>
+        <text x="272" y="104" text-anchor="middle" font-size="8" fill="rgba(245,244,239,.5)" font-weight="600">Free</text>
+      </svg>
+      <p style="font-size:.68rem;color:var(--muted);line-height:1.65;margin-top:.5rem;">~170k IoT messages + Lambda invocations/month at 15s intervals. DynamoDB &lt;1% of 200M free monthly requests. Open-Meteo has no free-tier limit. Total AWS bill: <strong style="color:var(--green)">$0.00</strong>.</p>
+    </div>
+
+    <!-- Context + security -->
+    <div style="display:flex;flex-direction:column;gap:1.25rem;">
+      <div class="panel">
+        <div class="panel-label">Uganda Energy Context</div>
+        <p style="font-size:.78rem;color:var(--muted);line-height:1.8;margin-bottom:.75rem;">Uganda's UMEME grid serves approximately 26% of the population. Voltage irregularities and residential overloads are common. This system targets that problem directly — providing real-time monitoring and predictive alerts without requiring expensive infrastructure.</p>
+        <table class="tbl">
+          <thead><tr><th>Parameter</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Grid operator</td><td style="color:var(--green)">UMEME Limited</td></tr>
+            <tr><td>Weather coords</td><td style="color:var(--green)">0.3163°N, 32.5822°E</td></tr>
+            <tr><td>Nominal voltage</td><td>240V AC (Uganda standard)</td></tr>
+            <tr><td>Overload threshold</td><td>150W (single circuit)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <div class="panel-label">Security Model</div>
+        <table class="tbl">
+          <thead><tr><th>Layer</th><th>Mechanism</th></tr></thead>
+          <tbody>
+            <tr><td>Transport</td><td style="color:var(--green)">TLS 1.2 / Port 8883</td></tr>
+            <tr><td>Identity</td><td style="color:var(--green)">X.509 Mutual Auth</td></tr>
+            <tr><td>Authorisation</td><td style="color:var(--green)">Least-privilege policy</td></tr>
+            <tr><td>Scope</td><td style="color:var(--green)">4 permissions — nothing else</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- DynamoDB records -->
+  <div class="cwrap rise r5" style="margin-top:1.5rem;overflow-x:auto;">
+    <div class="panel-label" style="margin-bottom:.75rem;">Sample DynamoDB Records — Live Grafana View</div>
+    <table class="tbl">
+      <thead>
+        <tr><th>Timestamp</th><th>V (V)</th><th>I (A)</th><th>P (W)</th><th>Predicted (W)</th><th>Temp</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>2026-04-17T14:32:00Z</td><td>220.50</td><td>0.68</td><td>149.94</td><td>152.80</td><td>26.5°C</td><td><span class="badge b-safe">SAFE</span></td></tr>
+        <tr><td>2026-04-17T14:32:15Z</td><td>221.20</td><td>0.70</td><td>154.84</td><td>156.10</td><td>26.5°C</td><td><span class="badge b-over">OVERLOAD</span></td></tr>
+        <tr><td>2026-04-17T14:32:30Z</td><td>219.80</td><td>0.65</td><td>142.87</td><td>148.30</td><td>26.5°C</td><td><span class="badge b-safe">SAFE</span></td></tr>
+        <tr><td>2026-04-17T14:32:45Z</td><td>220.10</td><td>0.67</td><td>147.47</td><td><span class="badge b-ai">153.20 ↑</span></td><td>26.6°C</td><td><span class="badge b-safe">SAFE</span></td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:.68rem;color:var(--muted);line-height:1.65;margin-top:.75rem;">
+      Each row is one DynamoDB item. Composite key: <ic>deviceId</ic> (partition) + ISO timestamp (sort) — enables efficient range queries without scanning. <ic>predicted_power</ic> is written back to the same item by Lambda in the same invocation. Grafana reads the 50 latest via HTTP GET to the Lambda Function URL.
+    </p>
+  </div>
+
+</div>
+</div><!-- /s4 -->
+
+
+</div><!-- /deck -->
+
+<script>
+const TOTAL = 5;
+let cur = 0;
+let busy = false;
+
+const slides = Array.from(document.querySelectorAll('.slide'));
+const pline  = document.getElementById('pline');
+const curEl  = document.getElementById('cur');
+const prevBtn = document.getElementById('prev');
+const nextBtn = document.getElementById('next');
+const ndotsEl = document.getElementById('ndots');
+
+// Build dots
+const dots = [];
+for (let i = 0; i < TOTAL; i++) {
+  const d = document.createElement('div');
+  d.className = 'ndot' + (i === 0 ? ' on' : '');
+  d.addEventListener('click', () => goTo(i));
+  ndotsEl.appendChild(d);
+  dots.push(d);
+}
+
+function sync() {
+  pline.style.width = ((cur + 1) / TOTAL * 100) + '%';
+  curEl.textContent = String(cur + 1).padStart(2, '0');
+  dots.forEach((d, i) => d.classList.toggle('on', i === cur));
+  prevBtn.disabled = cur === 0;
+  nextBtn.disabled = cur === TOTAL - 1;
+}
+
+function goTo(n) {
+  if (busy || n === cur || n < 0 || n >= TOTAL) return;
+  busy = true;
+
+  const old = cur;
+  slides[old].classList.remove('active');
+  slides[old].classList.add('prev');
+
+  cur = n;
+  slides[cur].classList.add('active');
+  slides[cur].classList.remove('prev');
+  slides[cur].scrollTop = 0;
+
+  // re-trigger .rise animations on new slide
+  slides[cur].querySelectorAll('.rise').forEach(el => {
+    el.style.animation = 'none';
+    el.offsetHeight; // reflow
+    el.style.animation = '';
+  });
+
+  setTimeout(() => {
+    slides[old].classList.remove('prev');
+    busy = false;
+  }, 750);
+
+  sync();
+}
+
+function go(dir) { goTo(cur + dir); }
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(1);
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   go(-1);
+});
+
+// Touch
+let tx = 0;
+document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
+document.addEventListener('touchend',   e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  if (Math.abs(dx) > 50) go(dx < 0 ? 1 : -1);
+}, { passive: true });
+
+sync();
+</script>
+</body>
+</html>
